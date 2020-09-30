@@ -1,0 +1,4 @@
+export const SERVER_CONFIG = {
+    SERVER_PORT: 8081,
+    CLIENT_PORT: 8080
+};
