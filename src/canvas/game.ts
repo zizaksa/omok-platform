@@ -1,5 +1,9 @@
-import { AppCanvas } from "./app-canvas";
+import { AppCanvas } from './ui/app-canvas';
+import { AppGame } from './ui/app-game';
 
-const appCanvas = new AppCanvas(800, 600);
+const container = document.getElementById('container');
+const appCanvas = new AppGame(container);
 
-document.getElementById('container').appendChild(appCanvas.getView());
+appCanvas.init().then(() => {
+    console.log('Game initialized'); 
+});

@@ -4,17 +4,19 @@
   "description": "Omok for AI competition",
   "main": "index.js",
   "scripts": {
-    "build-server": "",
-    "build-client": "webpack",
-    "build": "npm run build-server && npm run build-client",
+    "build:server": "",
+    "build:client": "webpack",
+    "build": "npm run build:server && npm run build:client",
     "start": "npm run build && set DEBUG=* && ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch:client": "webpack-dev-server --port 8080",
+    "watch:server": "nodemon --exec ts-node src/server.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zizaksa/omok-platform.git"
   },
-  "author": "Chaehong Jeong <brcps12@gmail.com>",
+  "author": "Chaehong Jeong <brcps12@gmail.com>, Hyunsoo Kim <rlagustn2497@naver.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/zizaksa/omok-platform/issues"
@@ -25,10 +27,12 @@
     "@types/pixi.js": "^5.0.0",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^6.1.1",
+    "nodemon": "^2.0.4",
     "ts-loader": "^8.0.4",
     "ts-node": "^9.0.0",
     "webpack": "^4.44.2",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
     "debug": "^4.2.0",
