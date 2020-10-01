@@ -57,7 +57,6 @@ export class AppBoard implements AppDrawable {
         let board = new Sprite(boardRes.texture);
         board.width = this.width;
         board.height = this.height;
-        console.log(boardRes, board);
         this.view.addChild(board);
     }
 

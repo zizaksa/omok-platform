@@ -22,8 +22,8 @@ export class OmokClient {
     };
 
     constructor(port: number) {
-        this.server = createServer((res: IncomingMessage, req: ServerResponse) => {
-            this.defaultHandler(res, req);
+        this.server = createServer((req: IncomingMessage, res: ServerResponse) => {
+            this.defaultHandler(req, res);
         });
         this.port = port;
 

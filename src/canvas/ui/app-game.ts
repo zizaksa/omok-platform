@@ -1,6 +1,8 @@
 import { AppBoard } from "./app-board";
 import { AppCanvas } from "./app-canvas";
 import { AppStone, AppStoneColor } from "./app-stone";
+import * as io from 'socket.io-client';
+import { Coordinate } from "../../common/coordinate";
 
 export class AppGame {
     private container: HTMLElement;
@@ -15,8 +17,11 @@ export class AppGame {
 
     private turn: AppStoneColor = AppStone.BLACK;
 
+    private socket: SocketIOClient.Socket;
+
     constructor(container: HTMLElement) {
         this.container = container;
+        this.socket = io.connect('http://127.0.0.1:8081');
     }
 
     async init() {
@@ -35,6 +40,14 @@ export class AppGame {
 
         this.board = new AppBoard(this.boardWidth, this.boardHeight);
         this.canvas.addDrawable(this.board);
+
+        this.socket.on('connect', () => {
+            console.log('server connected');
+        });
+
+        this.socket.on('place stone', (x: number, y: number) => {
+            this.placeStone(new Coordinate(x, y));
+        });
     }
 
     private onMouseMove(x: number, y: number) {
@@ -55,13 +68,17 @@ export class AppGame {
         }
     }
 
+    private placeStone(pos: Coordinate) {
+        if (this.board.placeStone(this.turn, pos)) {
+            this.changeTurn();
+        }
+    }
+
     private onMouseClick(x: number, y: number) {
         const gridPos = this.board.getGridPosition(x, y);
 
         if (gridPos.x >= 0) {
-            if (this.board.placeStone(this.turn, gridPos)) {
-                this.changeTurn();
-            }
+            this.placeStone(gridPos);
         }
     }
 }
