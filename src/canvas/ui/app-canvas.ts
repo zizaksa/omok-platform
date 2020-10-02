@@ -5,9 +5,6 @@ import { AppDrawable } from './app-drawable';
 import { AppMouseHandler } from './app-mouse-handler';
 
 export class AppCanvas {
-    private width: number;
-    private height: number;
-
     private app: Application;
 
     private displayWidth: number;
@@ -16,10 +13,7 @@ export class AppCanvas {
     private mouseMoveHandlers: AppMouseHandler[] = [];
     private mouseClickHandlers: AppMouseHandler[] = [];
 
-    constructor (width: number, height: number) {
-        this.width = width;
-        this.height = height;
-
+    constructor (private width: number, private height: number) {
         this.displayWidth = width;
         this.displayHeight = height;
 

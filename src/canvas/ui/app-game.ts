@@ -3,25 +3,28 @@ import { AppCanvas } from "./app-canvas";
 import { AppStone, AppStoneColor } from "./app-stone";
 import * as io from 'socket.io-client';
 import { Coordinate } from "../../common/coordinate";
+import { APP_CONFIG } from "../../config";
+import { DefaultOmokRule } from "../../common/rules/default-omok-rule";
+import { AppUx } from "./app-ux";
+import { MSG_PLACE_STONE } from "../../common/messages";
 
 export class AppGame {
-    private container: HTMLElement;
-
     private canvas: AppCanvas;
     private board: AppBoard;
 
-    private canvasWidth: number = 680;
-    private canvasHeight: number = 680;
-    private boardWidth: number = 680;
-    private boardHeight: number = 680;
+    private canvasWidth = 1000;
+    private canvasHeight = 680;
+    private boardWidth = 680;
+    private boardHeight = 680;
+    private uxCanvasWidth = 320;
+    private uxCanvasHeight = 680;
 
     private turn: AppStoneColor = AppStone.BLACK;
 
     private socket: SocketIOClient.Socket;
 
-    constructor(container: HTMLElement) {
-        this.container = container;
-        this.socket = io.connect('http://127.0.0.1:8081');
+    constructor(private container: HTMLElement) {
+        this.socket = io.connect(`http://${APP_CONFIG.SERVER_HOST}:${APP_CONFIG.SERVER_PORT}`);
     }
 
     async init() {
@@ -38,23 +41,28 @@ export class AppGame {
 
         this.container.appendChild(this.canvas.getView());
 
-        this.board = new AppBoard(this.boardWidth, this.boardHeight);
+        const omokRule = new DefaultOmokRule();
+        this.board = new AppBoard(omokRule, this.boardWidth, this.boardHeight);
         this.canvas.addDrawable(this.board);
 
         this.socket.on('connect', () => {
             console.log('server connected');
         });
 
-        this.socket.on('place stone', (x: number, y: number) => {
+        this.socket.on(MSG_PLACE_STONE, (x: number, y: number) => {
             this.placeStone(new Coordinate(x, y));
         });
+
+        const ux = new AppUx(this.uxCanvasWidth, this.uxCanvasHeight, this.board);
+        ux.getView().x = this.boardWidth;
+        this.canvas.addDrawable(ux);
     }
 
     private onMouseMove(x: number, y: number) {
         const gridPos = this.board.getGridPosition(x, y);
 
         if (gridPos.x < 0) {
-            this.board.removeStoneHint();
+            this.board.eraseStoneHint();
         } else {
             this.board.hintStone(this.turn, gridPos);
         }
@@ -79,6 +87,7 @@ export class AppGame {
 
         if (gridPos.x >= 0) {
             this.placeStone(gridPos);
+            this.socket.emit(MSG_PLACE_STONE, gridPos.x, gridPos.y);
         }
     }
 }

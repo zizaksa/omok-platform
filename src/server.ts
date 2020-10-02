@@ -1,13 +1,17 @@
 import * as http from 'http';
 import * as readline from 'readline';
 import * as io from 'socket.io';
+import { AIRunner } from './ai/ai-runner';
 import { Coordinate } from './common/coordinate';
-import { SERVER_CONFIG } from './config';
+import { MSG_PLACE_STONE } from './common/messages';
+import { APP_CONFIG } from './config';
 
 export class OmokServer {
     private server: http.Server;
     private port: number;
     private socket: io.Server;
+
+    private ai: AIRunner;
 
     constructor(port: number) {
         this.server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
@@ -16,6 +20,8 @@ export class OmokServer {
             res.end();
         });
         this.port = port;
+
+        this.ai = new AIRunner('./ai/run.exe');
     }
 
     run() {
@@ -25,15 +31,25 @@ export class OmokServer {
         this.socket.on('connection', () => {
             console.log('connected');
         });
+
+        this.ai.setColor(1);
+
+        this.ai.onStonePlaced((x, y) => {
+            this.placeStone(new Coordinate(x, y));
+        });
+
+        this.socket.on(MSG_PLACE_STONE, (x, y) => {
+            this.ai.placeStone(x, y);
+        });
     }
 
     placeStone(pos: Coordinate) {
-        this.socket.emit('place stone', pos.x, pos.y);
+        this.socket.emit(MSG_PLACE_STONE, pos.x, pos.y);
     }
 }
 
 if (require.main == module) {
-    const server = new OmokServer(SERVER_CONFIG.SERVER_PORT);
+    const server = new OmokServer(APP_CONFIG.SERVER_PORT);
     server.run();
 
     const rl = readline.createInterface({

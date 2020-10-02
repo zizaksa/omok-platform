@@ -1,14 +1,11 @@
 import { Container, DisplayObject, Graphics, Sprite } from "pixi.js";
 import { Coordinate } from "../../common/coordinate";
+import { OmokRule } from "../../common/omok-rule";
 import { AppAsset } from "./app-asset";
 import { AppDrawable } from "./app-drawable";
 import { AppStone, AppStoneColor } from "./app-stone";
 
 export class AppBoard implements AppDrawable {
-    private width: number;
-    private height: number;
-    private size: number;
-
     private lineWidth: number;
     private dotSize: number;
     private gridWidth: number;
@@ -20,20 +17,21 @@ export class AppBoard implements AppDrawable {
 
     private hintStoneDrawables: { [key in AppStoneColor]: AppStone };
 
-    private stoneHintAllowed: boolean = true;
+    private stoneHintAllowed: boolean = false;
 
-    private boardInfo: number[];
-    private placedStones: AppStone[];
+    private placedStones: {
+        pos: Coordinate,
+        stone: AppStone;
+    }[];
 
-    constructor(width: number, height: number, size: number = 19) {
-        this.width = width;
-        this.height = height;
-        this.size = size;
+    constructor(private rule: OmokRule,
+                private width: number, 
+                private height: number,
+                private size: number = 19) {
 
         this.gridColor = 0x000;
 
-        this.boardInfo = Array(size * size).fill(0);
-        this.placedStones = Array(size * size).fill(null);
+        this.placedStones = [];
 
         // 보드 크기에 맞춰 그리드 사이즈 계산
         this.lineWidth = 1;
@@ -99,6 +97,15 @@ export class AppBoard implements AppDrawable {
         this.view.addChild(grid);
     }
 
+    clearBoard() {
+        this.rule.init();
+        this.eraseStoneHint();
+        this.placedStones.forEach(({pos, stone}) => {
+            this.view.removeChild(stone.getView());
+        });
+        this.placedStones = [];
+    }
+
     getWidth(): number {
         return this.width;
     }
@@ -150,7 +157,7 @@ export class AppBoard implements AppDrawable {
         return new Coordinate(gridX, gridY);
     }
 
-    removeStoneHint() {
+    eraseStoneHint() {
         this.view.removeChild(this.hintStoneDrawables[AppStone.BLACK].getView());
         this.view.removeChild(this.hintStoneDrawables[AppStone.WHITE].getView());
     }
@@ -160,12 +167,12 @@ export class AppBoard implements AppDrawable {
             return;
         }
 
-        if (this.isPlaced(pos)) {
-            this.removeStoneHint();
+        if (this.rule.isPlaced(pos)) {
+            this.eraseStoneHint();
             return;
         }
 
-        this.removeStoneHint();
+        this.eraseStoneHint();
         const realPos = this.getDrawPosition(pos.x, pos.y);
         const stone = this.hintStoneDrawables[color];
         stone.setPosition(realPos);
@@ -177,51 +184,27 @@ export class AppBoard implements AppDrawable {
         return new AppStone(30, color, forHint);
     }
 
-    allowStoneHint() {
+    showStoneHint() {
         this.stoneHintAllowed = true;
     }
 
-    disallowStoneHint() {
+    hideStoneHint() {
         this.stoneHintAllowed = false;
-        this.removeStoneHint();
-    }
-
-    isPlaced(pos: Coordinate) {
-        if (this.placedStones[pos.x + pos.y * this.size] !== null) {
-            return true;
-        }
-
-        return false;
-    }
-
-    checkStonePlacement(color: AppStoneColor, pos: Coordinate): boolean {
-        return !this.isPlaced(pos);
+        this.eraseStoneHint();
     }
 
     placeStone(color: AppStoneColor, pos: Coordinate): boolean {
         const idx = pos.x + pos.y * this.size;
 
-        if (this.checkStonePlacement(color, pos)) {
+        if (this.rule.placeStone(color, pos)) {
             const stone = this.createStone(color);
             stone.setPosition(this.getDrawPosition(pos));
-            this.boardInfo[idx] = color === AppStone.BLACK ? 1 : 2;
-            this.placedStones[idx] = stone;
+            this.placedStones.push({ pos, stone });
             this.view.addChild(stone.getView());
 
             return true;
         }
 
         return false;
-    }
-
-    displaceStone(pos: Coordinate) {
-        const idx = pos.x + pos.y * this.size;
-        const stone = this.placedStones[idx];
-
-        if (stone !== null) {
-            this.view.removeChild(stone.getView());
-            this.boardInfo[idx] = 0;
-            this.placedStones[idx] = null;
-        }
     }
 }
