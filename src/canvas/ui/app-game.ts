@@ -6,7 +6,10 @@ import { Coordinate } from "../../common/coordinate";
 import { APP_CONFIG } from "../../config";
 import { DefaultOmokRule } from "../../common/rules/default-omok-rule";
 import { AppUx } from "./app-ux";
-import { MSG_PLACE_STONE } from "../../common/messages";
+import { AppPlayer } from "../player/app-player";
+import { AppAIPlayer } from "../player/app-ai-player";
+import { AppUserPlayer } from "../player/app-user-player";
+import { MSG_SRV_PLACE_STONE } from "../../common/messages";
 
 export class AppGame {
     private canvas: AppCanvas;
@@ -23,6 +26,12 @@ export class AppGame {
 
     private socket: SocketIOClient.Socket;
 
+    private players: {
+        [key in AppStoneColor]: AppPlayer
+    };
+
+    private gameStatus = 'PLAYING';
+
     constructor(private container: HTMLElement) {
         this.socket = io.connect(`http://${APP_CONFIG.SERVER_HOST}:${APP_CONFIG.SERVER_PORT}`);
     }
@@ -31,6 +40,7 @@ export class AppGame {
         this.canvas = new AppCanvas(this.canvasWidth, this.canvasHeight);
         await this.canvas.init();
 
+        /*
         this.canvas.onMouseMove((x: number, y: number) => {
             this.onMouseMove(x, y);
         });
@@ -38,6 +48,7 @@ export class AppGame {
         this.canvas.onMouseClick((x: number, y: number) => {
             this.onMouseClick(x, y);
         });
+        */
 
         this.container.appendChild(this.canvas.getView());
 
@@ -49,15 +60,25 @@ export class AppGame {
             console.log('server connected');
         });
 
-        this.socket.on(MSG_PLACE_STONE, (x: number, y: number) => {
-            this.placeStone(new Coordinate(x, y));
-        });
-
         const ux = new AppUx(this.uxCanvasWidth, this.uxCanvasHeight, this.board);
         ux.getView().x = this.boardWidth;
+        ux.startGameButtonClicked.on('start', () => {
+            this.startGame();
+        });
+
         this.canvas.addDrawable(ux);
+
+        this.players = {
+            [AppStone.BLACK]: new AppAIPlayer(AppStone.BLACK, this.socket),
+            [AppStone.WHITE]: new AppUserPlayer(AppStone.WHITE, this.board)
+        };
+
+        setInterval(() => {
+            this.socket.emit('haha');
+        }, 1000)
     }
 
+    /*
     private onMouseMove(x: number, y: number) {
         const gridPos = this.board.getGridPosition(x, y);
 
@@ -65,6 +86,21 @@ export class AppGame {
             this.board.eraseStoneHint();
         } else {
             this.board.hintStone(this.turn, gridPos);
+        }
+    }
+    */
+
+    startGame() {
+        this.gameProcess();
+    }
+
+    async gameProcess() {
+        let pos = new Coordinate(-1, -1);
+
+        console.log(this.players);
+        while (this.gameStatus === 'PLAYING') {
+            pos = await this.players[this.turn].changeTurn(pos);
+            this.placeStone(pos);
         }
     }
 
@@ -87,7 +123,7 @@ export class AppGame {
 
         if (gridPos.x >= 0) {
             this.placeStone(gridPos);
-            this.socket.emit(MSG_PLACE_STONE, gridPos.x, gridPos.y);
+            this.socket.emit(MSG_SRV_PLACE_STONE, gridPos.x, gridPos.y);
         }
     }
 }

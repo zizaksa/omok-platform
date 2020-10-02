@@ -24,8 +24,16 @@ export class DefaultOmokRule extends OmokRule {
         return true;
     }
 
-    placeStone(turn: AppStoneColor, pos: Coordinate): boolean {
+    canBePlaced(turn: AppStoneColor, pos: Coordinate): boolean {
         if (this.isPlaced(pos)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    placeStone(turn: AppStoneColor, pos: Coordinate): boolean {
+        if (!this.canBePlaced(turn, pos)) {
             return false;
         }
 

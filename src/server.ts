@@ -3,7 +3,7 @@ import * as readline from 'readline';
 import * as io from 'socket.io';
 import { AIRunner } from './ai/ai-runner';
 import { Coordinate } from './common/coordinate';
-import { MSG_PLACE_STONE } from './common/messages';
+import { MSG_CLI_PLACE_STONE, MSG_SRV_PLACE_STONE } from './common/messages';
 import { APP_CONFIG } from './config';
 
 export class OmokServer {
@@ -24,27 +24,26 @@ export class OmokServer {
         this.ai = new AIRunner('./ai/run.exe');
     }
 
-    run() {
+    async run() {
         this.server.listen(this.port);
         this.socket = io.listen(this.server);
 
-        this.socket.on('connection', () => {
+        await this.ai.setColor(1);
+
+        this.socket.on('connection', (client) => {
             console.log('connected');
-        });
 
-        this.ai.setColor(1);
-
-        this.ai.onStonePlaced((x, y) => {
-            this.placeStone(new Coordinate(x, y));
-        });
-
-        this.socket.on(MSG_PLACE_STONE, (x, y) => {
-            this.ai.placeStone(x, y);
+            client.on(MSG_SRV_PLACE_STONE, (x, y) => {
+                console.log('receive', x, y);
+                this.ai.placeStone(new Coordinate(x, y)).then((pos) => {
+                    this.socket.emit(MSG_CLI_PLACE_STONE, pos);
+                });
+            });
         });
     }
 
     placeStone(pos: Coordinate) {
-        this.socket.emit(MSG_PLACE_STONE, pos.x, pos.y);
+        this.socket.emit(MSG_CLI_PLACE_STONE, pos.x, pos.y);
     }
 }
 

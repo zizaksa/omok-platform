@@ -1,3 +1,4 @@
+import { Coordinate } from "../common/coordinate";
 import { ProgramRunner } from "./program-runner";
 
 export class AIRunner {
@@ -8,23 +9,16 @@ export class AIRunner {
         this.runner.spawn();
     }
 
-    setColor(color: number) {
-        this.runner.write(color.toString());
+    async setColor(color: number): Promise<boolean> {
+        await this.runner.send(color.toString());
+
+        return true;
     }
 
-    onStonePlaced(callback: (x: number, y: number) => void) {
-        this.runner.onReceive((message) => {
-            if (/\d+ \d+/.test(message)) {
-                const msg = message.split(' ');
-                const x = parseInt(msg[0]);
-                const y = parseInt(msg[1]);
+    async placeStone(pos: Coordinate): Promise<Coordinate> {
+        const msg = await this.runner.send(`1\n${pos.x} ${pos.y}`);
+        const data = msg.split(' ');
 
-                callback(x, y);
-            }
-        });
-    }
-
-    placeStone(x: number, y: number) {
-        this.runner.write(`${x} ${y}`);
+        return new Coordinate(parseInt(data[0]), parseInt(data[1]));
     }
 }

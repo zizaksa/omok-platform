@@ -9,9 +9,7 @@ export class ProgramRunner {
 
     spawn() {
         if (!this.proc) {
-            this.proc = child.fork(this.path, {
-                stdio: ['pipe']
-            });
+            this.proc = child.spawn(this.path);
             this.proc.on('end', () => {
                 this.proc = null;
             });
@@ -25,15 +23,12 @@ export class ProgramRunner {
         }
     }
 
-    write(message: string) {
-        if (this.proc) {
-            this.proc.send(message);
-        }
-    }
-
-    onReceive(callback: (string) => void) {
-        this.proc.on('message', (message) => {
-            callback(message);
+    send(message: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.proc.stdin.write(`${message}\n`);
+            this.proc.stdout.once('data', (data) => {
+                resolve(data.toString());
+            });
         });
     }
 }
