@@ -33,17 +33,13 @@ export class OmokServer {
         this.socket.on('connection', (client) => {
             console.log('connected');
 
-            client.on(MSG_PLACE_STONE, (x, y) => {
-                console.log('receive', x, y);
-                this.ai.placeStone(new Coordinate(x, y)).then((pos) => {
-                    this.socket.emit(MSG_PLACE_STONE, pos);
+            client.on(MSG_PLACE_STONE, (pos) => {
+                console.log('receive', pos);
+                this.ai.placeStone(pos).then((myPos) => {
+                    this.socket.emit(MSG_PLACE_STONE, myPos);
                 });
             });
         });
-    }
-
-    placeStone(pos: Coordinate) {
-        this.socket.emit(MSG_PLACE_STONE, pos.x, pos.y);
     }
 }
 
@@ -51,6 +47,7 @@ if (require.main == module) {
     const server = new OmokServer(APP_CONFIG.SERVER_PORT);
     server.run();
 
+    /*
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -68,4 +65,5 @@ if (require.main == module) {
     }).on('close', () => {
         process.exit();
     });
+    */
 }

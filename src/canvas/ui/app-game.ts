@@ -57,7 +57,7 @@ export class AppGame {
         this.canvas.addDrawable(this.ux);
 
         this.players = {
-            [StoneColor.BLACK]: new AppUserPlayer(StoneColor.BLACK, this.board),
+            [StoneColor.BLACK]: new AppAIPlayer(StoneColor.BLACK, this.server),
             [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
         };
 
@@ -75,6 +75,7 @@ export class AppGame {
     initGame() {
         this.turn = StoneColor.BLACK;
         this.gameStatus = GameStauts.WAITING;
+        this.board.clearBoard();
     }
 
     startGame() {
@@ -111,7 +112,7 @@ export class AppGame {
     }
 
     private initEvnetListeners() {
-        this.event.gameStart.on(() => {
+        this.event.gameStarted.on(() => {
             this.stopGame();
             this.initGame();
             this.startGame();

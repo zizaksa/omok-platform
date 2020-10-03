@@ -8,7 +8,8 @@ export class AppEventManager {
 
     private eventEmitter = new EventEmitter();
 
-    readonly gameStart = this.createEvent('GAME_START');
+    readonly gameStarted = this.createEvent('GAME_STARTED');
+    readonly gameEnded = this.createEvent('GAME_ENDED');
     readonly gridSelected = this.createEvent<Coordinate>('GRID_SELECTED');
     readonly turnChanged = this.createEvent<StoneColor>('TURN_CHANGED');
     readonly stonePlaced = this.createEvent<Coordinate>('STONE_PLACED');
