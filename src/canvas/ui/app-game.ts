@@ -56,30 +56,37 @@ export class AppGame {
         this.ux.getView().x = this.boardWidth;
         this.canvas.addDrawable(this.ux);
 
-        this.players = {
-            [StoneColor.BLACK]: new AppAIPlayer(StoneColor.BLACK, this.server),
-            [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
-        };
-
         this.gameTokenId = 0;
         this.initEvnetListeners();
+
+        this.players = {
+            // [StoneColor.BLACK]: new AppAIPlayer(StoneColor.BLACK, this.server),
+            [StoneColor.BLACK]: new AppUserPlayer(StoneColor.BLACK, this.board, this.server),
+            [StoneColor.WHITE]: new AppAIPlayer(StoneColor.WHITE, this.server),
+            // [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
+        };
 
         // Server Connection
         await this.server.connect();
         console.log('Server Connected');
 
+        this.event.blackPlayerChanged.emit(this.players[StoneColor.BLACK]);
+        this.event.whitePlayerChanged.emit(this.players[StoneColor.WHITE]);
+
         this.appInitialized = true;
         this.container.appendChild(this.canvas.getView());
     }
 
-    initGame() {
+    async initGame() {
         this.turn = StoneColor.BLACK;
         this.gameStatus = GameStauts.WAITING;
         this.board.clearBoard();
+        await this.server.initGame();
     }
 
     startGame() {
         this.gameStatus = GameStauts.PLAYING;
+        this.changeTurn(true);        
         this.gameProcess(this.gameTokenId);
     }
 
@@ -97,7 +104,12 @@ export class AppGame {
         }
     }
 
-    private changeTurn() {
+    private changeTurn(init: boolean = false) {
+        if (init) {
+            this.event.turnChanged.emit(StoneColor.BLACK);
+            return;
+        }
+
         if (this.turn == StoneColor.BLACK) {
             this.event.turnChanged.emit(StoneColor.WHITE);
         } else {
@@ -114,13 +126,30 @@ export class AppGame {
     private initEvnetListeners() {
         this.event.gameStarted.on(() => {
             this.stopGame();
-            this.initGame();
-            this.startGame();
-            console.log('Game Started!');
+            this.initGame().then(() => {
+                this.startGame();
+                console.log('Game Started!');
+            });
         });
 
         this.event.turnChanged.on((turn: StoneColor) => {
             this.turn = turn;
+        });
+
+        this.event.blackPlayerChanged.on((player) => {
+            if (player instanceof AppUserPlayer) {
+                this.server.blackPayerChange('user');
+            } else {
+                this.server.blackPayerChange('ai');
+            }
+        });
+
+        this.event.whitePlayerChanged.on((player) => {
+            if (player instanceof AppUserPlayer) {
+                this.server.whitePayerChange('user');
+            } else {
+                this.server.whitePayerChange('ai');
+            }
         });
     }
 }

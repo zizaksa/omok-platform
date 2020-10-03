@@ -1,13 +1,19 @@
 import { EventEmitter } from 'events';
 import { Container, DisplayObject, Graphics, Text } from 'pixi.js';
+import { GameStauts } from '../../common/game-status';
 import { StoneColor } from '../../common/stone-color';
 import { AppEventManager } from '../core/app-event-manager';
+import { AppPlayer } from '../player/app-player';
 import { AppDrawable } from './app-drawable';
 import { AppPlayerInfo } from './app-player-info';
 
 export class AppUx implements AppDrawable {
     private view: Container;
     private event: AppEventManager
+
+    private playerInfo: { [key in StoneColor]: AppPlayerInfo };
+
+    private gameStatus: GameStauts = GameStauts.WAITING;
 
     constructor(
         private width: number,
@@ -21,7 +27,7 @@ export class AppUx implements AppDrawable {
         background.drawRect(0, 0, 320, 680);
         background.endFill();
 
-        const gameStartButton = new Text('Game Start!', {
+        const gameStartButton = new Text('대국 시작', {
             fill: 0xFFFFFF
         });
 
@@ -31,19 +37,51 @@ export class AppUx implements AppDrawable {
         gameStartButton.buttonMode = true;
 
         gameStartButton.on('click', () => {
-            this.event.gameStarted.emit();
+            if (this.gameStatus === GameStauts.PLAYING) {
+                this.event.gameEnded.emit();
+            } else {
+                this.event.gameStarted.emit();
+            }
+        });
+
+        this.event.gameStarted.on(() => {
+            this.gameStatus = GameStauts.PLAYING;
+            gameStartButton.text = '대국 중지';
+        });
+
+        this.event.gameEnded.on(() => {
+            this.gameStatus = GameStauts.WAITING;
+            gameStartButton.text = '대국 시작';
         });
 
         this.view.addChild(background);
         this.view.addChild(gameStartButton);
 
-        const blackPlayerInfo = new AppPlayerInfo(this.width, StoneColor.BLACK);
-        blackPlayerInfo.inactive();
-        this.view.addChild(blackPlayerInfo.getView());
+        const blackPlayer = new AppPlayerInfo(this.width, StoneColor.BLACK);
+        this.view.addChild(blackPlayer.getView());
 
-        const whitePlayerInfo = new AppPlayerInfo(this.width, StoneColor.WHITE).getView();
-        whitePlayerInfo.y = this.height - (whitePlayerInfo as Container).height;
-        this.view.addChild(whitePlayerInfo);
+        const whitePlayer = new AppPlayerInfo(this.width, StoneColor.WHITE);
+        whitePlayer.getView().y = this.height - (whitePlayer.getView() as Container).height;
+        this.view.addChild(whitePlayer.getView());
+
+        this.playerInfo = {
+            [StoneColor.BLACK]: blackPlayer,
+            [StoneColor.WHITE]: whitePlayer
+        };
+
+        this.event.turnChanged.on((turn) => {
+            const opponent = turn === StoneColor.BLACK ? StoneColor.WHITE : StoneColor.BLACK;
+            this.playerInfo[turn].active();
+            this.playerInfo[opponent].inactive();
+        });
+
+        this.event.blackPlayerChanged.on((player: AppPlayer) => {
+            this.playerInfo[StoneColor.BLACK].name = player.getName();
+        });
+
+        this.event.whitePlayerChanged.on((player: AppPlayer) => {
+            this.playerInfo[StoneColor.WHITE].name = player.getName();
+        });
     }
 
     getWidth(): number {

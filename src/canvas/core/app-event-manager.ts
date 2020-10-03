@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { Coordinate } from '../../common/coordinate';
 import { StoneColor } from '../../common/stone-color';
+import { AppPlayer } from '../player/app-player';
 import { AppEvent } from './app-event';
 
 export class AppEventManager {
@@ -13,6 +14,8 @@ export class AppEventManager {
     readonly gridSelected = this.createEvent<Coordinate>('GRID_SELECTED');
     readonly turnChanged = this.createEvent<StoneColor>('TURN_CHANGED');
     readonly stonePlaced = this.createEvent<Coordinate>('STONE_PLACED');
+    readonly blackPlayerChanged = this.createEvent<AppPlayer>('BLACK_PLAYER_CHANGED');
+    readonly whitePlayerChanged = this.createEvent<AppPlayer>('WHITE_PLAYER_CHANGED');
 
     private constructor() {}
 

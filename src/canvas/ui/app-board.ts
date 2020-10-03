@@ -98,7 +98,8 @@ export class AppBoard implements AppDrawable {
         });
 
         this.event.gameEnded.on(() => {
-            this.showWaiting();
+            // this.showWaiting();
+            this.disableInteraction();
         });
         this.showWaiting();
     }

@@ -1,6 +1,6 @@
 import * as io from 'socket.io-client';
 import { Coordinate } from '../../common/coordinate';
-import { MSG_PLACE_STONE } from '../../common/messages';
+import { MSG_CHANGE_BLACK_PLAYER, MSG_CHANGE_WHITE_PLAYER, MSG_INIT_GAME, MSG_PLACE_STONE } from '../../common/messages';
 
 export class AppServerManager {
     private socket: SocketIOClient.Socket;
@@ -22,7 +22,19 @@ export class AppServerManager {
         return this.sendAndWaitResponse(MSG_PLACE_STONE, pos);
     }
 
-    sendAndWaitResponse(msgName: string, data: any): Promise<any> {
+    initGame(): Promise<void> {
+        return this.sendAndWaitResponse(MSG_INIT_GAME);
+    }
+
+    blackPayerChange(playerName: string): Promise<void> {
+        return this.sendAndWaitResponse(MSG_CHANGE_BLACK_PLAYER, playerName);
+    }
+
+    whitePayerChange(playerName: string): Promise<void> {
+        return this.sendAndWaitResponse(MSG_CHANGE_WHITE_PLAYER, playerName);
+    }
+
+    sendAndWaitResponse(msgName: string, data?: any): Promise<any> {
         return new Promise((resolve, reject) => {
             this.socket.once(msgName, (res) => {
                 resolve(res);

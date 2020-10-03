@@ -1,3 +1,15 @@
 export const MSG_PLACE_STONE = 'MSG_PLACE_STONE';
 
 export const MSG_NEW_GAME = 'MSG_NEW_GAME';
+
+export const MSG_CHANGE_BLACK_PLAYER = 'MSG_CHANGE_BLACK_PLAYER';
+
+export const MSG_CHANGE_WHITE_PLAYER = 'MSG_CHANGE_WHITE_PLAYER';
+
+export const MSG_AI_PLACE_STONE = 'MSG_AI_PLACE_STONE';
+
+export const MSG_START_GAME = 'MSG_START_GAME';
+
+export const MSG_STOP_GAME = 'MSG_STOP_GAME';
+
+export const MSG_INIT_GAME = 'MSG_INIT_GAME';
