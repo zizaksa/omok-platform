@@ -227,6 +227,10 @@ export class AppBoard implements AppDrawable {
     }
 
     waitUesrSelection(autoDisable: boolean): Promise<Coordinate> {
+        if (!this.view.interactive) {
+            return  Promise.reject('interaction is not enabled');
+        }
+        
         return new Promise((resolve, reject) => {
             this.event.gridSelected.once((pos: Coordinate) => {
                 if (autoDisable) {

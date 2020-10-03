@@ -12,6 +12,7 @@ import { AppEventManager } from '../core/app-event-manager';
 import { AppServerManager } from '../core/app-server-manager';
 import { AppOptions, defaultAppOptions } from '../core/app-options';
 import { OmokRule } from '../../common/omok-rule';
+import { MSG_PLACE_STONE } from '../../common/messages';
 
 export class AppGame {
     private canvas: AppCanvas;
@@ -60,6 +61,9 @@ export class AppGame {
             [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
         };
 
+        this.gameTokenId = 0;
+        this.initEvnetListeners();
+
         // Server Connection
         await this.server.connect();
         console.log('Server Connected');
@@ -86,7 +90,6 @@ export class AppGame {
     async gameProcess(gameTokenId: number) {
         let pos = new Coordinate(-1, -1);
 
-        console.log(this.players);
         while (gameTokenId === this.gameTokenId && this.gameStatus === GameStauts.PLAYING) {
             pos = await this.players[this.turn].changeTurn(pos);
             this.placeStone(pos);
@@ -112,6 +115,7 @@ export class AppGame {
             this.stopGame();
             this.initGame();
             this.startGame();
+            console.log('Game Started!');
         });
 
         this.event.turnChanged.on((turn: StoneColor) => {

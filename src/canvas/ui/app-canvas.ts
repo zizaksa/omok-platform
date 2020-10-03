@@ -20,8 +20,6 @@ export class AppCanvas {
             transparent: false,
             resolution: 1
          });
-         
-        this.app.stage.interactive = true;
     }
 
     async init() {
