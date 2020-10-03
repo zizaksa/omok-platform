@@ -4,12 +4,16 @@ import { AppServerManager } from '../core/app-server-manager';
 import { AppPlayer } from './app-player';
 
 export class AppAIPlayer extends AppPlayer {
-    constructor(private color: StoneColor,
+    constructor(color: StoneColor,
                 private server: AppServerManager) {
-        super();
+        super(color);
     }
 
     changeTurn(pos: Coordinate): Promise<Coordinate> {
         return this.server.placeStone(pos);
+    }
+
+    getName(): string {
+        return 'AI 플레이어';
     }
 }

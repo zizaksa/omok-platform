@@ -1,12 +1,12 @@
 import { EventEmitter } from 'events';
-import { Container, DisplayObject, Graphics, InteractionEvent, Sprite } from 'pixi.js';
+import { Container, DisplayObject, Graphics, InteractionEvent, Sprite, Text } from 'pixi.js';
 import { Coordinate } from '../../common/coordinate';
 import { OmokRule } from '../../common/omok-rule';
 import { DefaultOmokRule } from '../../common/rules/default-omok-rule';
 import { StoneColor } from '../../common/stone-color';
 import { AppEventManager } from '../core/app-event-manager';
 import { AppAsset } from './app-asset';
-import { AppDrawable } from './app-drawable';
+import { AppDrawable, AppDrawableUtils } from './app-drawable';
 import { AppStone } from './app-stone';
 
 export class AppBoard implements AppDrawable {
@@ -28,6 +28,8 @@ export class AppBoard implements AppDrawable {
     private hintStoneColor: StoneColor = StoneColor.BLACK;
 
     private event: AppEventManager;
+
+    private waitingScreen: Container;
 
     constructor(
         private width: number, 
@@ -75,6 +77,30 @@ export class AppBoard implements AppDrawable {
                 this.event.gridSelected.emit(gridPos);
             }
         });
+
+        this.waitingScreen = new Container();
+        const waitingOverlay = new Graphics();
+        waitingOverlay.beginFill(0x000);
+        waitingOverlay.drawRect(0, 0, this.width, this.height);
+        waitingOverlay.alpha = 0.5;
+        waitingOverlay.endFill();
+        this.waitingScreen.addChild(waitingOverlay);
+        const waitingText = new Text('대국이 준비중입니다.', {
+            fill: 0xFFFFFF,
+            fontSize: 24,
+            fontStyle: 'bold'
+        });
+        AppDrawableUtils.setCenter(waitingText, this.view);
+        this.waitingScreen.addChild(waitingText);
+
+        this.event.gameStarted.on(() => {
+            this.hideWaiting();
+        });
+
+        this.event.gameEnded.on(() => {
+            this.showWaiting();
+        });
+        this.showWaiting();
     }
 
     drawBoard() {
@@ -122,6 +148,14 @@ export class AppBoard implements AppDrawable {
         }
 
         this.view.addChild(grid);
+    }
+
+    showWaiting() {
+        this.view.addChild(this.waitingScreen);
+    }
+
+    hideWaiting() {
+        this.view.removeChild(this.waitingScreen);
     }
 
     clearBoard() {
@@ -230,7 +264,7 @@ export class AppBoard implements AppDrawable {
         if (!this.view.interactive) {
             return  Promise.reject('interaction is not enabled');
         }
-        
+
         return new Promise((resolve, reject) => {
             this.event.gridSelected.once((pos: Coordinate) => {
                 if (autoDisable) {

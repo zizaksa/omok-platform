@@ -1,7 +1,9 @@
 import { EventEmitter } from 'events';
 import { Container, DisplayObject, Graphics, Text } from 'pixi.js';
+import { StoneColor } from '../../common/stone-color';
 import { AppEventManager } from '../core/app-event-manager';
 import { AppDrawable } from './app-drawable';
+import { AppPlayerInfo } from './app-player-info';
 
 export class AppUx implements AppDrawable {
     private view: Container;
@@ -15,7 +17,7 @@ export class AppUx implements AppDrawable {
         this.view = new Container();
 
         const background = new Graphics();
-        background.beginFill(0x000);
+        background.beginFill(0x242824);
         background.drawRect(0, 0, 320, 680);
         background.endFill();
 
@@ -34,6 +36,14 @@ export class AppUx implements AppDrawable {
 
         this.view.addChild(background);
         this.view.addChild(gameStartButton);
+
+        const blackPlayerInfo = new AppPlayerInfo(this.width, StoneColor.BLACK);
+        blackPlayerInfo.inactive();
+        this.view.addChild(blackPlayerInfo.getView());
+
+        const whitePlayerInfo = new AppPlayerInfo(this.width, StoneColor.WHITE).getView();
+        whitePlayerInfo.y = this.height - (whitePlayerInfo as Container).height;
+        this.view.addChild(whitePlayerInfo);
     }
 
     getWidth(): number {
