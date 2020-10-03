@@ -107,4 +107,4 @@ dist/*
 !dist/.gitkeep
 
 ai/*
-!/ai.gitkeep
+!/ai/.gitkeep
