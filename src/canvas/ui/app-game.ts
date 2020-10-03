@@ -1,19 +1,22 @@
 import { AppBoard } from './app-board';
 import { AppCanvas } from './app-canvas';
-import { AppStone, AppStoneColor } from './app-stone';
-import * as io from 'socket.io-client';
 import { Coordinate } from '../../common/coordinate';
-import { APP_CONFIG } from '../../config';
 import { DefaultOmokRule } from '../../common/rules/default-omok-rule';
 import { AppUx } from './app-ux';
 import { AppPlayer } from '../player/app-player';
 import { AppAIPlayer } from '../player/app-ai-player';
 import { AppUserPlayer } from '../player/app-user-player';
-import { MSG_SRV_PLACE_STONE } from '../../common/messages';
+import { StoneColor } from '../../common/stone-color';
+import { GameStauts } from '../../common/game-status';
+import { AppEventManager } from '../core/app-event-manager';
+import { AppServerManager } from '../core/app-server-manager';
+import { AppOptions, defaultAppOptions } from '../core/app-options';
+import { OmokRule } from '../../common/omok-rule';
 
 export class AppGame {
     private canvas: AppCanvas;
     private board: AppBoard;
+    private ux: AppUx;
 
     private canvasWidth = 1000;
     private canvasHeight = 680;
@@ -22,93 +25,79 @@ export class AppGame {
     private uxCanvasWidth = 320;
     private uxCanvasHeight = 680;
 
-    private turn: AppStoneColor = AppStone.BLACK;
-
-    private socket: SocketIOClient.Socket;
+    private event: AppEventManager;
+    private server: AppServerManager;
+    private omokRule: OmokRule;
+    private gameStatus: GameStauts;
+    private turn: StoneColor;
+    private gameTokenId: number;
 
     private players: {
-        [key in AppStoneColor]: AppPlayer
+        [key in StoneColor]: AppPlayer
     };
 
-    private gameStatus = 'PLAYING';
+    private appInitialized: boolean = false;
 
-    constructor(private container: HTMLElement) {
-        this.socket = io.connect(`http://${APP_CONFIG.SERVER_HOST}:${APP_CONFIG.SERVER_PORT}`);
+    constructor(private container: HTMLElement, private appOptions: AppOptions = defaultAppOptions) {
+        this.server = new AppServerManager(appOptions.serverOptions.host, appOptions.serverOptions.port);
+        this.event = AppEventManager.getInstance();
     }
 
     async init() {
         this.canvas = new AppCanvas(this.canvasWidth, this.canvasHeight);
         await this.canvas.init();
 
-        /*
-        this.canvas.onMouseMove((x: number, y: number) => {
-            this.onMouseMove(x, y);
-        });
-
-        this.canvas.onMouseClick((x: number, y: number) => {
-            this.onMouseClick(x, y);
-        });
-        */
-
-        this.container.appendChild(this.canvas.getView());
-
-        const omokRule = new DefaultOmokRule();
-        this.board = new AppBoard(omokRule, this.boardWidth, this.boardHeight);
+        this.omokRule = new DefaultOmokRule();
+        this.board = new AppBoard(this.boardWidth, this.boardHeight, this.omokRule);
         this.canvas.addDrawable(this.board);
 
-        this.socket.on('connect', () => {
-            console.log('server connected');
-        });
-
-        const ux = new AppUx(this.uxCanvasWidth, this.uxCanvasHeight, this.board);
-        ux.getView().x = this.boardWidth;
-        ux.startGameButtonClicked.on('start', () => {
-            this.startGame();
-        });
-
-        this.canvas.addDrawable(ux);
+        this.ux = new AppUx(this.uxCanvasWidth, this.uxCanvasHeight);
+        this.ux.getView().x = this.boardWidth;
+        this.canvas.addDrawable(this.ux);
 
         this.players = {
-            [AppStone.BLACK]: new AppAIPlayer(AppStone.BLACK, this.socket),
-            [AppStone.WHITE]: new AppUserPlayer(AppStone.WHITE, this.board)
+            [StoneColor.BLACK]: new AppUserPlayer(StoneColor.BLACK, this.board),
+            [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
         };
 
-        setInterval(() => {
-            this.socket.emit('haha');
-        }, 1000);
+        // Server Connection
+        await this.server.connect();
+        console.log('Server Connected');
+
+        this.appInitialized = true;
+        this.container.appendChild(this.canvas.getView());
     }
 
-    /*
-    private onMouseMove(x: number, y: number) {
-        const gridPos = this.board.getGridPosition(x, y);
-
-        if (gridPos.x < 0) {
-            this.board.eraseStoneHint();
-        } else {
-            this.board.hintStone(this.turn, gridPos);
-        }
+    initGame() {
+        this.turn = StoneColor.BLACK;
+        this.gameStatus = GameStauts.WAITING;
     }
-    */
 
     startGame() {
-        this.gameProcess();
+        this.gameStatus = GameStauts.PLAYING;
+        this.gameProcess(this.gameTokenId);
     }
 
-    async gameProcess() {
+    stopGame() {
+        this.gameTokenId++;
+        this.gameStatus = GameStauts.WAITING;
+    }
+
+    async gameProcess(gameTokenId: number) {
         let pos = new Coordinate(-1, -1);
 
         console.log(this.players);
-        while (this.gameStatus === 'PLAYING') {
+        while (gameTokenId === this.gameTokenId && this.gameStatus === GameStauts.PLAYING) {
             pos = await this.players[this.turn].changeTurn(pos);
             this.placeStone(pos);
         }
     }
 
     private changeTurn() {
-        if (this.turn == AppStone.BLACK) {
-            this.turn = AppStone.WHITE;
+        if (this.turn == StoneColor.BLACK) {
+            this.event.turnChanged.emit(StoneColor.WHITE);
         } else {
-            this.turn = AppStone.BLACK;
+            this.event.turnChanged.emit(StoneColor.BLACK);
         }
     }
 
@@ -118,12 +107,15 @@ export class AppGame {
         }
     }
 
-    private onMouseClick(x: number, y: number) {
-        const gridPos = this.board.getGridPosition(x, y);
+    private initEvnetListeners() {
+        this.event.gameStart.on(() => {
+            this.stopGame();
+            this.initGame();
+            this.startGame();
+        });
 
-        if (gridPos.x >= 0) {
-            this.placeStone(gridPos);
-            this.socket.emit(MSG_SRV_PLACE_STONE, gridPos.x, gridPos.y);
-        }
+        this.event.turnChanged.on((turn: StoneColor) => {
+            this.turn = turn;
+        });
     }
 }

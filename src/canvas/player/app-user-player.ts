@@ -1,15 +1,16 @@
 import { Coordinate } from '../../common/coordinate';
+import { StoneColor } from '../../common/stone-color';
 import { AppBoard } from '../ui/app-board';
-import { AppStoneColor } from '../ui/app-stone';
 import { AppPlayer } from './app-player';
 
 export class AppUserPlayer extends AppPlayer {
-    constructor(private color: AppStoneColor,
+    constructor(private color: StoneColor,
                 private board: AppBoard) {
         super();
     }
 
     async changeTurn(pos: Coordinate): Promise<Coordinate> {
-        return await this.board.enableInteraction(this.color);
+        this.board.enableInteraction(this.color);
+        return await this.board.waitUesrSelection(true);
     }
 }

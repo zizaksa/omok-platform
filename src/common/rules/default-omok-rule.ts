@@ -1,6 +1,6 @@
-import { AppStone, AppStoneColor } from '../../canvas/ui/app-stone';
 import { Coordinate } from '../coordinate';
 import { OmokRule } from '../omok-rule';
+import { StoneColor } from '../stone-color';
 
 export class DefaultOmokRule extends OmokRule {
     private size: number;
@@ -24,7 +24,7 @@ export class DefaultOmokRule extends OmokRule {
         return true;
     }
 
-    canBePlaced(turn: AppStoneColor, pos: Coordinate): boolean {
+    canBePlaced(turn: StoneColor, pos: Coordinate): boolean {
         if (this.isPlaced(pos)) {
             return false;
         }
@@ -32,12 +32,12 @@ export class DefaultOmokRule extends OmokRule {
         return true;
     }
 
-    placeStone(turn: AppStoneColor, pos: Coordinate): boolean {
+    placeStone(turn: StoneColor, pos: Coordinate): boolean {
         if (!this.canBePlaced(turn, pos)) {
             return false;
         }
 
-        this.stoneInfo[pos.x + pos.y * this.size] = turn === AppStone.BLACK ? 1 : 2;
+        this.stoneInfo[pos.x + pos.y * this.size] = turn === StoneColor.BLACK ? 1 : 2;
         return true;
     }
 }

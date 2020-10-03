@@ -2,9 +2,12 @@ import { EventEmitter } from 'events';
 import { Container, DisplayObject, Graphics, InteractionEvent, Sprite } from 'pixi.js';
 import { Coordinate } from '../../common/coordinate';
 import { OmokRule } from '../../common/omok-rule';
+import { DefaultOmokRule } from '../../common/rules/default-omok-rule';
+import { StoneColor } from '../../common/stone-color';
+import { AppEventManager } from '../core/app-event-manager';
 import { AppAsset } from './app-asset';
 import { AppDrawable } from './app-drawable';
-import { AppStone, AppStoneColor } from './app-stone';
+import { AppStone } from './app-stone';
 
 export class AppBoard implements AppDrawable {
     private lineWidth: number;
@@ -15,22 +18,24 @@ export class AppBoard implements AppDrawable {
     private gridColor: number;
 
     private view: Container;
-
-    private hintStoneDrawables: { [key in AppStoneColor]: AppStone };
+    private hintStoneDrawables: { [key in StoneColor]: AppStone };
 
     private placedStones: {
         pos: Coordinate,
         stone: AppStone;
     }[];
 
-    private gridSelectionEvent: EventEmitter = new EventEmitter();
-    private hintStoneColor: AppStoneColor = AppStone.BLACK;
+    private hintStoneColor: StoneColor = StoneColor.BLACK;
 
-    constructor(private rule: OmokRule,
-                private width: number, 
-                private height: number,
-                private size: number = 19) {
+    private event: AppEventManager;
 
+    constructor(
+        private width: number, 
+        private height: number,
+        private rule: OmokRule = new DefaultOmokRule(),
+        private size: number = 19
+    ) {
+        this.event = AppEventManager.getInstance();
         this.gridColor = 0x000;
 
         this.placedStones = [];
@@ -42,8 +47,8 @@ export class AppBoard implements AppDrawable {
         this.gridHeight = (height - this.lineWidth) / (size + 1);
 
         this.hintStoneDrawables = {
-            [AppStone.BLACK]: this.createStone(AppStone.BLACK, true),
-            [AppStone.WHITE]: this.createStone(AppStone.WHITE, true)
+            [StoneColor.BLACK]: this.createStone(StoneColor.BLACK, true),
+            [StoneColor.WHITE]: this.createStone(StoneColor.WHITE, true)
         };
 
         this.view = new Container();
@@ -67,7 +72,7 @@ export class AppBoard implements AppDrawable {
             const gridPos = this.getGridPosition(point.x, point.y);
 
             if (gridPos.x >= 0 && this.rule.canBePlaced(this.hintStoneColor, gridPos)) {
-                this.gridSelectionEvent.emit('selected', gridPos);
+                this.event.gridSelected.emit(gridPos);
             }
         });
     }
@@ -180,11 +185,11 @@ export class AppBoard implements AppDrawable {
     }
 
     eraseStoneHint() {
-        this.view.removeChild(this.hintStoneDrawables[AppStone.BLACK].getView());
-        this.view.removeChild(this.hintStoneDrawables[AppStone.WHITE].getView());
+        this.view.removeChild(this.hintStoneDrawables[StoneColor.BLACK].getView());
+        this.view.removeChild(this.hintStoneDrawables[StoneColor.WHITE].getView());
     }
 
-    setHintStoneColor(color: AppStoneColor) {
+    setHintStoneColor(color: StoneColor) {
         this.hintStoneColor = color;
     }
 
@@ -201,12 +206,12 @@ export class AppBoard implements AppDrawable {
         this.view.addChild(this.hintStoneDrawables[this.hintStoneColor].getView());
     }
 
-    createStone(color: AppStoneColor, forHint?: boolean): AppStone {
+    createStone(color: StoneColor, forHint?: boolean): AppStone {
         // @TODO change stone size based on board size
         return new AppStone(30, color, forHint);
     }
 
-    placeStone(color: AppStoneColor, pos: Coordinate): boolean {
+    placeStone(color: StoneColor, pos: Coordinate): boolean {
         const idx = pos.x + pos.y * this.size;
 
         if (this.rule.placeStone(color, pos)) {
@@ -221,16 +226,20 @@ export class AppBoard implements AppDrawable {
         return false;
     }
 
-    enableInteraction(color: AppStoneColor): Promise<Coordinate> {
-        this.hintStoneColor = color;
-        this.view.interactive = true;
-
+    waitUesrSelection(autoDisable: boolean): Promise<Coordinate> {
         return new Promise((resolve, reject) => {
-            this.gridSelectionEvent.once('selected', (pos: Coordinate) => {
-                this.disableInteraction();
+            this.event.gridSelected.once((pos: Coordinate) => {
+                if (autoDisable) {
+                    this.disableInteraction();
+                }
                 resolve(pos);
             });
         });
+    }
+
+    enableInteraction(color: StoneColor) {
+        this.hintStoneColor = color;
+        this.view.interactive = true;
     }
 
     disableInteraction() {

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { Container, DisplayObject, Graphics } from 'pixi.js';
-import { AppBoard } from './app-board';
+import { AppEventManager } from '../core/app-event-manager';
 import { AppDrawable } from './app-drawable';
 
 export class AppUx implements AppDrawable {
@@ -8,9 +8,13 @@ export class AppUx implements AppDrawable {
 
     private startGameButtonEvent = new EventEmitter();
 
-    constructor(private width: number,
-                private height: number,
-                private board: AppBoard) {
+    private eventManager: AppEventManager
+
+    constructor(
+        private width: number,
+        private height: number
+    ) {
+        this.eventManager = AppEventManager.getInstance();
         this.view = new Container();
 
         const g = new Graphics();
@@ -26,7 +30,7 @@ export class AppUx implements AppDrawable {
 
         button.interactive = true;
         button.on('click', () => {
-            this.startGameButtonEvent.emit('start');
+            this.eventManager.gameStart.emit();
         });
 
         this.view.addChild(g);

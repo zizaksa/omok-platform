@@ -1,23 +1,21 @@
 import { Container, DisplayObject, Sprite } from 'pixi.js';
 import { Coordinate } from '../../common/coordinate';
+import { StoneColor } from '../../common/stone-color';
 import { AppAsset } from './app-asset';
 import { AppDrawable } from './app-drawable';
 
 export class AppStone implements AppDrawable {
-    public static readonly WHITE = 'WHITE';
-    public static readonly BLACK = 'BLACK';
-
     private width: number;
     private view: Container;
 
-    constructor(width: number, color: AppStoneColor, forHint?: boolean) {
+    constructor(width: number, color: StoneColor, forHint?: boolean) {
         this.width = width;
         this.view = new Container();
 
         const res = AppAsset.get(
-            color === AppStone.WHITE ? 
-            AppAsset.IMG_WHITE_STONE :
-            AppAsset.IMG_BLACK_STONE
+            color === StoneColor.BLACK ?
+            AppAsset.IMG_BLACK_STONE :
+            AppAsset.IMG_WHITE_STONE
         );
         
         const sprite = new Sprite(res.texture);
@@ -56,5 +54,3 @@ export class AppStone implements AppDrawable {
         return this.view;
     }
 }
-
-export type AppStoneColor = 'BLACK' | 'WHITE';
