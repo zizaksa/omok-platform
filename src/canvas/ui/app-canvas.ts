@@ -75,11 +75,11 @@ export class AppCanvas {
     }
     
     globalToLocal(x: number, y: number): Coordinate {
-        let scrollX = document.body.scrollLeft;
-        let scrollY = document.body.scrollTop;
-        let offset = this._cumulativeOffset(this.app.renderer.view);
-        let localX = this.width * (x - offset.left + scrollX) / this.displayWidth;
-        let localY = this.height * (y - offset.top + scrollY) / this.displayHeight;
+        const scrollX = document.body.scrollLeft;
+        const scrollY = document.body.scrollTop;
+        const offset = this._cumulativeOffset(this.app.renderer.view);
+        const localX = this.width * (x - offset.left + scrollX) / this.displayWidth;
+        const localY = this.height * (y - offset.top + scrollY) / this.displayHeight;
         return new Coordinate(localX, localY);
     }
 

@@ -57,12 +57,12 @@ if (require.main == module) {
     });
     
     rl.on('line', (line) => {
-        let data = line.split(' ');
+        const data = line.split(' ');
 
         if (data.length < 2) return;
 
-        let x = parseInt(data[0]);
-        let y = parseInt(data[1]);
+        const x = parseInt(data[0]);
+        const y = parseInt(data[1]);
 
         server.placeStone(new Coordinate(x, y));
     }).on('close', () => {

@@ -1,15 +1,15 @@
-import { AppBoard } from "./app-board";
-import { AppCanvas } from "./app-canvas";
-import { AppStone, AppStoneColor } from "./app-stone";
+import { AppBoard } from './app-board';
+import { AppCanvas } from './app-canvas';
+import { AppStone, AppStoneColor } from './app-stone';
 import * as io from 'socket.io-client';
-import { Coordinate } from "../../common/coordinate";
-import { APP_CONFIG } from "../../config";
-import { DefaultOmokRule } from "../../common/rules/default-omok-rule";
-import { AppUx } from "./app-ux";
-import { AppPlayer } from "../player/app-player";
-import { AppAIPlayer } from "../player/app-ai-player";
-import { AppUserPlayer } from "../player/app-user-player";
-import { MSG_SRV_PLACE_STONE } from "../../common/messages";
+import { Coordinate } from '../../common/coordinate';
+import { APP_CONFIG } from '../../config';
+import { DefaultOmokRule } from '../../common/rules/default-omok-rule';
+import { AppUx } from './app-ux';
+import { AppPlayer } from '../player/app-player';
+import { AppAIPlayer } from '../player/app-ai-player';
+import { AppUserPlayer } from '../player/app-user-player';
+import { MSG_SRV_PLACE_STONE } from '../../common/messages';
 
 export class AppGame {
     private canvas: AppCanvas;
@@ -75,7 +75,7 @@ export class AppGame {
 
         setInterval(() => {
             this.socket.emit('haha');
-        }, 1000)
+        }, 1000);
     }
 
     /*

@@ -1,7 +1,7 @@
-import { Coordinate } from "../../common/coordinate";
-import { AppBoard } from "../ui/app-board";
-import { AppStoneColor } from "../ui/app-stone";
-import { AppPlayer } from "./app-player";
+import { Coordinate } from '../../common/coordinate';
+import { AppBoard } from '../ui/app-board';
+import { AppStoneColor } from '../ui/app-stone';
+import { AppPlayer } from './app-player';
 
 export class AppUserPlayer extends AppPlayer {
     constructor(private color: AppStoneColor,

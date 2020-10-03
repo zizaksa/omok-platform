@@ -1,5 +1,5 @@
-import { Coordinate } from "../common/coordinate";
-import { ProgramRunner } from "./program-runner";
+import { Coordinate } from '../common/coordinate';
+import { ProgramRunner } from './program-runner';
 
 export class AIRunner {
     private runner: ProgramRunner;

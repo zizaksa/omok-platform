@@ -27,12 +27,12 @@ export class OmokClient {
         });
         this.port = port;
 
-        log("Created Server");
+        log('Created Server');
     }
 
     run() {
         this.server.listen(this.port);
-        log("Listen " + this.port);
+        log('Listen ' + this.port);
     }
 
     close() {
@@ -40,7 +40,7 @@ export class OmokClient {
     }
 
     defaultHandler(req: IncomingMessage, res: ServerResponse) {
-        let pathname = url.parse(req.url).pathname;
+        const pathname = url.parse(req.url).pathname;
 
         if (req.method !== 'GET') {
             res.statusCode = 501;
@@ -68,6 +68,6 @@ export class OmokClient {
             res.end('Not found');
         });
 
-        log("Request for " + pathname + " received.");
+        log('Request for ' + pathname + ' received.');
     }
 }

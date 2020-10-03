@@ -1,7 +1,7 @@
-import { Container, DisplayObject, Sprite } from "pixi.js";
-import { Coordinate } from "../../common/coordinate";
-import { AppAsset } from "./app-asset";
-import { AppDrawable } from "./app-drawable";
+import { Container, DisplayObject, Sprite } from 'pixi.js';
+import { Coordinate } from '../../common/coordinate';
+import { AppAsset } from './app-asset';
+import { AppDrawable } from './app-drawable';
 
 export class AppStone implements AppDrawable {
     public static readonly WHITE = 'WHITE';
@@ -35,7 +35,7 @@ export class AppStone implements AppDrawable {
     setPosition(pos: Coordinate);
     setPosition(x: number, y: number);
     setPosition(xOrPos: number | Coordinate, y?: number) {
-        if (typeof xOrPos === "number") {
+        if (typeof xOrPos === 'number') {
             this.view.x = xOrPos;
             this.view.y = y;
         } else {
@@ -57,4 +57,4 @@ export class AppStone implements AppDrawable {
     }
 }
 
-export type AppStoneColor = "BLACK" | "WHITE";
+export type AppStoneColor = 'BLACK' | 'WHITE';

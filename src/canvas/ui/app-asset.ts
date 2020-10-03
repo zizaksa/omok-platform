@@ -1,4 +1,4 @@
-import { Loader } from "pixi.js";
+import { Loader } from 'pixi.js';
 
 export class AppAsset {
     private static instance: AppAsset;
@@ -19,7 +19,7 @@ export class AppAsset {
             IMG_WHITE_STONE: 'assets/stone_white.png'
         };
 
-        for (let resId in this.assets) {
+        for (const resId in this.assets) {
             this.loader.add(resId, this.assets[resId]);
         }
     }

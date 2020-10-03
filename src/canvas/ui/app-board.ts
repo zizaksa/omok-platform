@@ -1,10 +1,10 @@
-import { EventEmitter } from "events";
-import { Container, DisplayObject, Graphics, InteractionEvent, Sprite } from "pixi.js";
-import { Coordinate } from "../../common/coordinate";
-import { OmokRule } from "../../common/omok-rule";
-import { AppAsset } from "./app-asset";
-import { AppDrawable } from "./app-drawable";
-import { AppStone, AppStoneColor } from "./app-stone";
+import { EventEmitter } from 'events';
+import { Container, DisplayObject, Graphics, InteractionEvent, Sprite } from 'pixi.js';
+import { Coordinate } from '../../common/coordinate';
+import { OmokRule } from '../../common/omok-rule';
+import { AppAsset } from './app-asset';
+import { AppDrawable } from './app-drawable';
+import { AppStone, AppStoneColor } from './app-stone';
 
 export class AppBoard implements AppDrawable {
     private lineWidth: number;
@@ -69,12 +69,12 @@ export class AppBoard implements AppDrawable {
             if (gridPos.x >= 0 && this.rule.canBePlaced(this.hintStoneColor, gridPos)) {
                 this.gridSelectionEvent.emit('selected', gridPos);
             }
-        })
+        });
     }
 
     drawBoard() {
-        let boardRes = AppAsset.get(AppAsset.IMG_BOARD);
-        let board = new Sprite(boardRes.texture);
+        const boardRes = AppAsset.get(AppAsset.IMG_BOARD);
+        const board = new Sprite(boardRes.texture);
         board.width = this.width;
         board.height = this.height;
         this.view.addChild(board);
@@ -103,7 +103,7 @@ export class AppBoard implements AppDrawable {
         // 화점
         const centrify = (n) => {
             return n * Math.floor(this.size / 3) + Math.floor(this.size / 6);
-        }
+        };
         for (let i = 0; i < 9; i++) {
             const dot = new Graphics();
             dot.beginFill(this.gridColor);
@@ -168,8 +168,8 @@ export class AppBoard implements AppDrawable {
             y = xOrPos.y;
         }
         
-        let gridX = Math.round((x - this.gridWidth) / this.gridWidth);
-        let gridY = Math.round((y - this.gridHeight) / this.gridHeight);
+        const gridX = Math.round((x - this.gridWidth) / this.gridWidth);
+        const gridY = Math.round((y - this.gridHeight) / this.gridHeight);
 
         if (gridX < 0 || gridX >= this.size ||
             gridY < 0 || gridY >= this.size) {

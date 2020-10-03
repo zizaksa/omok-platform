@@ -1,7 +1,7 @@
-import { EventEmitter } from "events";
-import { Container, DisplayObject, Graphics } from "pixi.js";
-import { AppBoard } from "./app-board";
-import { AppDrawable } from "./app-drawable";
+import { EventEmitter } from 'events';
+import { Container, DisplayObject, Graphics } from 'pixi.js';
+import { AppBoard } from './app-board';
+import { AppDrawable } from './app-drawable';
 
 export class AppUx implements AppDrawable {
     private view: Container;
@@ -27,7 +27,7 @@ export class AppUx implements AppDrawable {
         button.interactive = true;
         button.on('click', () => {
             this.startGameButtonEvent.emit('start');
-        })
+        });
 
         this.view.addChild(g);
         this.view.addChild(button);

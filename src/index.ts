@@ -1,6 +1,6 @@
-import { OmokClient } from "./client";
-import { APP_CONFIG } from "./config";
-import { OmokServer } from "./server";
+import { OmokClient } from './client';
+import { APP_CONFIG } from './config';
+import { OmokServer } from './server';
 
 const client = new OmokClient(APP_CONFIG.CLIENT_PORT);
 client.run();

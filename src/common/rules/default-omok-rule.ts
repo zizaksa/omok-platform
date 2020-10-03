@@ -1,6 +1,6 @@
-import { AppStone, AppStoneColor } from "../../canvas/ui/app-stone";
-import { Coordinate } from "../coordinate";
-import { OmokRule } from "../omok-rule";
+import { AppStone, AppStoneColor } from '../../canvas/ui/app-stone';
+import { Coordinate } from '../coordinate';
+import { OmokRule } from '../omok-rule';
 
 export class DefaultOmokRule extends OmokRule {
     private size: number;

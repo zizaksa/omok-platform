@@ -1,4 +1,4 @@
-import { DisplayObject } from "pixi.js";
+import { DisplayObject } from 'pixi.js';
 
 export interface AppDrawable {
     getWidth(): number;

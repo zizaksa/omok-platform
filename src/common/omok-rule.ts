@@ -1,5 +1,5 @@
-import { AppStoneColor } from "../canvas/ui/app-stone";
-import { Coordinate } from "./coordinate";
+import { AppStoneColor } from '../canvas/ui/app-stone';
+import { Coordinate } from './coordinate';
 
 export abstract class OmokRule {
     abstract init();
