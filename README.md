@@ -3,7 +3,7 @@ Omok for AI competition
 
 ## Prerequisite
 
-- NodeJS
+- NodeJS [Link](https://nodejs.org/ko/)
 
 ## How to Run
 Run follow script:

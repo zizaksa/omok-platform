@@ -47,6 +47,7 @@ export class DefaultOmokRule extends OmokRule {
 
         this.stoneInfo[pos.x + pos.y * this.size] = turn === StoneColor.BLACK ? 1 : 2;
         this.lastPlaced = new Coordinate(pos.x, pos.y);
+        this.remains--;
     }
 
     isFinished(): boolean {
