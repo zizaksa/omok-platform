@@ -1,4 +1,6 @@
 # Omok
+![](https://raw.githubusercontent.com/zizaksa/study/master/wiki/img/5/omok-platform2.png)
+
 Omok for AI competition
 
 ## Prerequisite
