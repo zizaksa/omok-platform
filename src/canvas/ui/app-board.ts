@@ -73,7 +73,7 @@ export class AppBoard implements AppDrawable {
             const point = event.data.getLocalPosition(this.view);
             const gridPos = this.getGridPosition(point.x, point.y);
 
-            if (gridPos.x >= 0 && this.rule.canBePlaced(this.hintStoneColor, gridPos)) {
+            if (gridPos.x >= 0 && this.rule.checkValidity(this.hintStoneColor, gridPos)) {
                 this.event.gridSelected.emit(gridPos);
             }
         });
@@ -229,7 +229,7 @@ export class AppBoard implements AppDrawable {
     }
 
     hintStone(pos: Coordinate) {
-        if (this.rule.isPlaced(pos)) {
+        if (this.rule.getStoneColor(pos) !== null) {
             this.eraseStoneHint();
             return;
         }
@@ -249,7 +249,8 @@ export class AppBoard implements AppDrawable {
     placeStone(color: StoneColor, pos: Coordinate): boolean {
         const idx = pos.x + pos.y * this.size;
 
-        if (this.rule.placeStone(color, pos)) {
+        if (this.rule.checkValidity(color, pos)) {
+            this.rule.placeStone(color, pos);
             const stone = this.createStone(color);
             stone.setPosition(this.getDrawPosition(pos));
             this.placedStones.push({ pos, stone });

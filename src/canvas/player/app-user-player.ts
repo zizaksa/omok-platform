@@ -13,11 +13,13 @@ export class AppUserPlayer extends AppPlayer {
 
     async changeTurn(pos: Coordinate): Promise<Coordinate> {
         this.board.enableInteraction(this.color);
-        this.server.placeStone(pos);
-        return await this.board.waitUesrSelection(true);
+        pos = await this.board.waitUesrSelection(true);
+        this.server.placeStone(this.color, pos);
+
+        return pos;
     }
 
     getName(): string {
-        return '플레이어';
+        return 'user';
     }
 }

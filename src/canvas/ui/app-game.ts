@@ -7,12 +7,11 @@ import { AppPlayer } from '../player/app-player';
 import { AppAIPlayer } from '../player/app-ai-player';
 import { AppUserPlayer } from '../player/app-user-player';
 import { StoneColor } from '../../common/stone-color';
-import { GameStauts } from '../../common/game-status';
+import { GameStatus } from '../../common/game-status';
 import { AppEventManager } from '../core/app-event-manager';
 import { AppServerManager } from '../core/app-server-manager';
 import { AppOptions, defaultAppOptions } from '../core/app-options';
 import { OmokRule } from '../../common/omok-rule';
-import { MSG_PLACE_STONE } from '../../common/messages';
 
 export class AppGame {
     private canvas: AppCanvas;
@@ -29,13 +28,13 @@ export class AppGame {
     private event: AppEventManager;
     private server: AppServerManager;
     private omokRule: OmokRule;
-    private gameStatus: GameStauts;
+    private gameStatus: GameStatus = GameStatus.STOPPED;
     private turn: StoneColor;
     private gameTokenId: number;
 
     private players: {
-        [key in StoneColor]: AppPlayer
-    };
+        [key in StoneColor]?: AppPlayer
+    } = {};
 
     private appInitialized: boolean = false;
 
@@ -59,46 +58,72 @@ export class AppGame {
         this.gameTokenId = 0;
         this.initEvnetListeners();
 
-        this.players = {
-            // [StoneColor.BLACK]: new AppAIPlayer(StoneColor.BLACK, this.server),
-            [StoneColor.BLACK]: new AppUserPlayer(StoneColor.BLACK, this.board, this.server),
-            [StoneColor.WHITE]: new AppAIPlayer(StoneColor.WHITE, this.server),
-            // [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
-        };
+        this.players = {};
+        // [StoneColor.BLACK]: new AppAIPlayer(StoneColor.BLACK, this.server),
+        // [StoneColor.BLACK]: new AppUserPlayer(StoneColor.BLACK, this.board, this.server),
+        // [StoneColor.WHITE]: new AppAIPlayer(StoneColor.WHITE, this.server),
+        // [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
 
         // Server Connection
         await this.server.connect();
         console.log('Server Connected');
 
-        this.event.blackPlayerChanged.emit(this.players[StoneColor.BLACK]);
-        this.event.whitePlayerChanged.emit(this.players[StoneColor.WHITE]);
+        this.event.playerChanged.emit({
+            color: StoneColor.BLACK,
+            player: new AppUserPlayer(StoneColor.BLACK, this.board, this.server)
+        });
+        this.event.playerChanged.emit({
+            color: StoneColor.WHITE,
+            player: new AppUserPlayer(StoneColor.WHITE, this.board, this.server)
+        });
 
+        // Initialized
         this.appInitialized = true;
+
+        // Add to view
         this.container.appendChild(this.canvas.getView());
     }
 
     async initGame() {
+        if (this.gameStatus !== GameStatus.STOPPED) {
+            return Promise.reject('Game is playing');
+        }
+
+        this.gameStatus = GameStatus.INITIALIZING;
         this.turn = StoneColor.BLACK;
-        this.gameStatus = GameStauts.WAITING;
         this.board.clearBoard();
-        await this.server.initGame();
+        await this.server.initGame({
+            players: Object.values(this.players).map((p) => ({[p.getColor()]: p.getName()})) as any
+        });
+        this.gameStatus = GameStatus.INITIALIZED;
     }
 
-    startGame() {
-        this.gameStatus = GameStauts.PLAYING;
-        this.changeTurn(true);        
+    async startGame() {
+        if (this.gameStatus !== GameStatus.INITIALIZED) {
+            return;
+        }
+
+        this.gameStatus = GameStatus.PLAYING;
+        this.changeTurn(true);
+        await this.server.startGame();
         this.gameProcess(this.gameTokenId);
     }
 
-    stopGame() {
+    async stopGame() {
+        if (this.gameStatus === GameStatus.STOPPED) {
+            return Promise.resolve();
+        }
+
+        this.gameStatus = GameStatus.STOPPING;
+        await this.server.stopGame();
         this.gameTokenId++;
-        this.gameStatus = GameStauts.WAITING;
+        this.gameStatus = GameStatus.STOPPED;
     }
 
     async gameProcess(gameTokenId: number) {
         let pos = new Coordinate(-1, -1);
 
-        while (gameTokenId === this.gameTokenId && this.gameStatus === GameStauts.PLAYING) {
+        while (gameTokenId === this.gameTokenId && this.gameStatus === GameStatus.PLAYING) {
             pos = await this.players[this.turn].changeTurn(pos);
             this.placeStone(pos);
         }
@@ -125,8 +150,11 @@ export class AppGame {
 
     private initEvnetListeners() {
         this.event.gameStarted.on(() => {
-            this.stopGame();
-            this.initGame().then(() => {
+            Promise.resolve().then(() => {
+                return this.stopGame();
+            }).then(() => {
+                return this.initGame();
+            }).then(() => {
                 this.startGame();
                 console.log('Game Started!');
             });
@@ -136,20 +164,8 @@ export class AppGame {
             this.turn = turn;
         });
 
-        this.event.blackPlayerChanged.on((player) => {
-            if (player instanceof AppUserPlayer) {
-                this.server.blackPayerChange('user');
-            } else {
-                this.server.blackPayerChange('ai');
-            }
-        });
-
-        this.event.whitePlayerChanged.on((player) => {
-            if (player instanceof AppUserPlayer) {
-                this.server.whitePayerChange('user');
-            } else {
-                this.server.whitePayerChange('ai');
-            }
+        this.event.playerChanged.on((data) => {
+            this.players[data.color] = data.player;
         });
     }
 }

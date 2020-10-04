@@ -14,8 +14,7 @@ export class AppEventManager {
     readonly gridSelected = this.createEvent<Coordinate>('GRID_SELECTED');
     readonly turnChanged = this.createEvent<StoneColor>('TURN_CHANGED');
     readonly stonePlaced = this.createEvent<Coordinate>('STONE_PLACED');
-    readonly blackPlayerChanged = this.createEvent<AppPlayer>('BLACK_PLAYER_CHANGED');
-    readonly whitePlayerChanged = this.createEvent<AppPlayer>('WHITE_PLAYER_CHANGED');
+    readonly playerChanged = this.createEvent<{ color: StoneColor, player: AppPlayer }>('PLAYER_CHANGED');
 
     private constructor() {}
 

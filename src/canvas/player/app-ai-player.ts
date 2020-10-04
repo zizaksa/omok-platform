@@ -14,6 +14,6 @@ export class AppAIPlayer extends AppPlayer {
     }
 
     getName(): string {
-        return 'AI 플레이어';
+        return 'run';
     }
 }

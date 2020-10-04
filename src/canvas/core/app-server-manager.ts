@@ -1,6 +1,8 @@
 import * as io from 'socket.io-client';
 import { Coordinate } from '../../common/coordinate';
-import { MSG_CHANGE_BLACK_PLAYER, MSG_CHANGE_WHITE_PLAYER, MSG_INIT_GAME, MSG_PLACE_STONE } from '../../common/messages';
+import { GameConfig } from '../../common/game-config';
+import { MSG_GET_NEXT_PLACE, MSG_INIT_GAME, MSG_PLACE_STONE, MSG_START_GAME, MSG_STOP_GAME } from '../../common/messages';
+import { StoneColor } from '../../common/stone-color';
 
 export class AppServerManager {
     private socket: SocketIOClient.Socket;
@@ -18,26 +20,34 @@ export class AppServerManager {
         });
     }
 
-    placeStone(pos: Coordinate): Promise<Coordinate> {
-        return this.sendAndWaitResponse(MSG_PLACE_STONE, pos);
+    placeStone(color: StoneColor, pos: Coordinate): Promise<Coordinate | string> {
+        return this.sendAndWaitResponse(MSG_PLACE_STONE, { color, pos });
     }
 
-    initGame(): Promise<void> {
-        return this.sendAndWaitResponse(MSG_INIT_GAME);
+    getNextPlace(color: StoneColor, pos: Coordinate): Promise<Coordinate> {
+        return this.sendAndWaitResponse(MSG_GET_NEXT_PLACE, { color, pos });
     }
 
-    blackPayerChange(playerName: string): Promise<void> {
-        return this.sendAndWaitResponse(MSG_CHANGE_BLACK_PLAYER, playerName);
+    initGame(config: GameConfig): Promise<string> {
+        return this.sendAndWaitResponse(MSG_INIT_GAME, config);
     }
 
-    whitePayerChange(playerName: string): Promise<void> {
-        return this.sendAndWaitResponse(MSG_CHANGE_WHITE_PLAYER, playerName);
+    startGame(): Promise<string> {
+        return this.sendAndWaitResponse(MSG_START_GAME);
+    }
+
+    stopGame(): Promise<string> {
+        return this.sendAndWaitResponse(MSG_STOP_GAME);
     }
 
     sendAndWaitResponse(msgName: string, data?: any): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.socket.once(msgName, (res) => {
-                resolve(res);
+            this.socket.once(msgName, (res, errMsg) => {
+                if (res === 'error') {
+                    reject(errMsg);
+                } else {
+                    resolve(res);
+                }
             });
             this.socket.emit(msgName, data);
         });

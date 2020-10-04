@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Container, DisplayObject, Graphics, Text } from 'pixi.js';
-import { GameStauts } from '../../common/game-status';
-import { StoneColor } from '../../common/stone-color';
+import { GameStatus } from '../../common/game-status';
+import { getOpponent, StoneColor } from '../../common/stone-color';
 import { AppEventManager } from '../core/app-event-manager';
 import { AppPlayer } from '../player/app-player';
 import { AppDrawable } from './app-drawable';
@@ -13,7 +13,7 @@ export class AppUx implements AppDrawable {
 
     private playerInfo: { [key in StoneColor]: AppPlayerInfo };
 
-    private gameStatus: GameStauts = GameStauts.WAITING;
+    private gameStatus: GameStatus = GameStatus.STOPPED;
 
     constructor(
         private width: number,
@@ -37,7 +37,7 @@ export class AppUx implements AppDrawable {
         gameStartButton.buttonMode = true;
 
         gameStartButton.on('click', () => {
-            if (this.gameStatus === GameStauts.PLAYING) {
+            if (this.gameStatus === GameStatus.PLAYING) {
                 this.event.gameEnded.emit();
             } else {
                 this.event.gameStarted.emit();
@@ -45,12 +45,12 @@ export class AppUx implements AppDrawable {
         });
 
         this.event.gameStarted.on(() => {
-            this.gameStatus = GameStauts.PLAYING;
+            this.gameStatus = GameStatus.PLAYING;
             gameStartButton.text = '대국 중지';
         });
 
         this.event.gameEnded.on(() => {
-            this.gameStatus = GameStauts.WAITING;
+            this.gameStatus = GameStatus.STOPPED;
             gameStartButton.text = '대국 시작';
         });
 
@@ -70,17 +70,13 @@ export class AppUx implements AppDrawable {
         };
 
         this.event.turnChanged.on((turn) => {
-            const opponent = turn === StoneColor.BLACK ? StoneColor.WHITE : StoneColor.BLACK;
+            const opponent = getOpponent(turn);
             this.playerInfo[turn].active();
             this.playerInfo[opponent].inactive();
         });
 
-        this.event.blackPlayerChanged.on((player: AppPlayer) => {
-            this.playerInfo[StoneColor.BLACK].name = player.getName();
-        });
-
-        this.event.whitePlayerChanged.on((player: AppPlayer) => {
-            this.playerInfo[StoneColor.WHITE].name = player.getName();
+        this.event.playerChanged.on(({color, player}) => {
+            this.playerInfo[color].name = player.getName() === 'user' ? '플레이어': player.getName();
         });
     }
 

@@ -1,4 +1,7 @@
-export enum GameStauts {
-    WAITING,
+export enum GameStatus {
+    STOPPING,
+    STOPPED,
+    INITIALIZING,
+    INITIALIZED,
     PLAYING
 }
