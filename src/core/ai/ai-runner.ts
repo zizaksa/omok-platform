@@ -14,7 +14,7 @@ export class AIRunner {
     }
 
     async sendColor(color: number): Promise<boolean> {
-        await this.runner.send(color.toString());
+        await this.runner.sendAndWait(color.toString());
 
         return true;
     }

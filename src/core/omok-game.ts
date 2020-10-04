@@ -9,7 +9,7 @@ import { getOpponent, StoneColor } from '../common/stone-color';
 import { OmokAIPlayer, OmokPlayer, OmokUserPlayer } from './omok-player';
 
 export class OmokGame {
-    private players: { [key in StoneColor]?: OmokPlayer };
+    private players: { [key in StoneColor]?: OmokPlayer } = {};
     private rule: OmokRule;
 
     private turn: StoneColor;
@@ -24,7 +24,7 @@ export class OmokGame {
             config = Object.assign({}, DEFAULT_GAME_CONFIG, config);
 
             if (!config.players[StoneColor.BLACK] || !config.players[StoneColor.WHITE]) {
-                this.socket.emit(MSG_INIT_GAME, 'failed');
+                this.socket.emit(MSG_INIT_GAME, 'error', config);
                 return;
             }
 
@@ -42,6 +42,8 @@ export class OmokGame {
 
                 this.players[color].init();
             });
+
+            this.initGame();
 
             Promise.resolve().then(() => {
                 return this.players[StoneColor.BLACK].setColor(StoneColor.BLACK);
@@ -72,16 +74,16 @@ export class OmokGame {
             }
 
             if (this.turn !== color) {
-                this.socket.emit(MSG_PLACE_STONE, 'error');
+                this.socket.emit(MSG_PLACE_STONE, 'error', 'not your turn');
                 return;
             }
 
             if (!this.rule.checkValidity(color, pos)) {
-                this.socket.emit(MSG_PLACE_STONE, 'error');
+                this.socket.emit(MSG_PLACE_STONE, 'error', 'cannot place');
                 return;
             }
 
-            this.players[color].placeStone(pos);
+            this.players[getOpponent(color)].placeStone(pos);
             this.rule.placeStone(color, pos);
             this.turn = getOpponent(this.turn);
 
@@ -120,6 +122,7 @@ export class OmokGame {
 
     private initGame() {
         this.turn = StoneColor.BLACK;
+        this.rule.init();
     }
 
     private startGame() {
@@ -128,5 +131,6 @@ export class OmokGame {
 
     private stopGame() {
         this.gameStatus = GameStatus.STOPPED;
+        this.destroy();
     }
 }

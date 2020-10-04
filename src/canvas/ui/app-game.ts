@@ -11,7 +11,7 @@ import { GameStatus } from '../../common/game-status';
 import { AppEventManager } from '../core/app-event-manager';
 import { AppServerManager } from '../core/app-server-manager';
 import { AppOptions, defaultAppOptions } from '../core/app-options';
-import { OmokRule } from '../../common/omok-rule';
+import { OmokRule } from '../../common/rules/omok-rule';
 
 export class AppGame {
     private canvas: AppCanvas;
@@ -70,11 +70,12 @@ export class AppGame {
 
         this.event.playerChanged.emit({
             color: StoneColor.BLACK,
-            player: new AppUserPlayer(StoneColor.BLACK, this.board, this.server)
+            player: new AppAIPlayer(StoneColor.BLACK, this.server)
         });
         this.event.playerChanged.emit({
             color: StoneColor.WHITE,
-            player: new AppUserPlayer(StoneColor.WHITE, this.board, this.server)
+            // player: new AppUserPlayer(StoneColor.WHITE, this.server, this.board)
+            player: new AppUserPlayer(StoneColor.WHITE, this.server, this.board)
         });
 
         // Initialized
@@ -93,7 +94,10 @@ export class AppGame {
         this.turn = StoneColor.BLACK;
         this.board.clearBoard();
         await this.server.initGame({
-            players: Object.values(this.players).map((p) => ({[p.getColor()]: p.getName()})) as any
+            players: {
+                [StoneColor.BLACK]: this.players[StoneColor.BLACK].getName(),
+                [StoneColor.WHITE]: this.players[StoneColor.WHITE].getName()
+            }
         });
         this.gameStatus = GameStatus.INITIALIZED;
     }
@@ -124,8 +128,8 @@ export class AppGame {
         let pos = new Coordinate(-1, -1);
 
         while (gameTokenId === this.gameTokenId && this.gameStatus === GameStatus.PLAYING) {
-            pos = await this.players[this.turn].changeTurn(pos);
-            this.placeStone(pos);
+            pos = await this.players[this.turn].getNextPlace(pos);
+            await this.placeStone(pos);
         }
     }
 
@@ -142,7 +146,20 @@ export class AppGame {
         }
     }
 
-    private placeStone(pos: Coordinate) {
+    private async placeStone(pos: Coordinate) {
+        try {
+            const res = await this.server.placeStone(this.turn, pos);
+            if (typeof res === 'string') {
+                if (res.indexOf('win') >= 0) {
+                    console.log('winner', '');
+                    this.stopGame();
+                }
+            }
+        } catch(e) {
+            console.log(e);
+            this.stopGame();
+        }
+
         if (this.board.placeStone(this.turn, pos)) {
             this.changeTurn();
         }
@@ -157,7 +174,13 @@ export class AppGame {
             }).then(() => {
                 this.startGame();
                 console.log('Game Started!');
+            }).catch(e => {
+                console.log(e);
             });
+        });
+
+        this.event.gameEnded.on(() => {
+            this.stopGame();
         });
 
         this.event.turnChanged.on((turn: StoneColor) => {

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Container, DisplayObject, Graphics, InteractionEvent, Sprite, Text } from 'pixi.js';
 import { Coordinate } from '../../common/coordinate';
-import { OmokRule } from '../../common/omok-rule';
+import { OmokRule } from '../../common/rules/omok-rule';
 import { DefaultOmokRule } from '../../common/rules/default-omok-rule';
 import { StoneColor } from '../../common/stone-color';
 import { AppEventManager } from '../core/app-event-manager';

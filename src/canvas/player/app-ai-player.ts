@@ -9,8 +9,10 @@ export class AppAIPlayer extends AppPlayer {
         super(color);
     }
 
-    changeTurn(pos: Coordinate): Promise<Coordinate> {
-        return this.server.placeStone(pos);
+    async getNextPlace(pos: Coordinate): Promise<Coordinate> {
+        pos = await this.server.getNextPlace(this.color, pos);
+        
+        return pos;
     }
 
     getName(): string {

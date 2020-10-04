@@ -8,7 +8,7 @@ export abstract class AppPlayer {
         this.color = color;
     }
 
-    abstract changeTurn(pos: Coordinate): Promise<Coordinate>;
+    abstract getNextPlace(pos: Coordinate): Promise<Coordinate>;
     
     abstract getName(): string;
 

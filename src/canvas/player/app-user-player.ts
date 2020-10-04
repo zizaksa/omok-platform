@@ -6,16 +6,14 @@ import { AppPlayer } from './app-player';
 
 export class AppUserPlayer extends AppPlayer {
     constructor(color: StoneColor,
-                private board: AppBoard,
-                private server: AppServerManager) {
+                private server: AppServerManager,
+                private board: AppBoard) {
         super(color);
     }
 
-    async changeTurn(pos: Coordinate): Promise<Coordinate> {
+    async getNextPlace(pos: Coordinate): Promise<Coordinate> {
         this.board.enableInteraction(this.color);
         pos = await this.board.waitUesrSelection(true);
-        this.server.placeStone(this.color, pos);
-
         return pos;
     }
 

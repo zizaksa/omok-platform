@@ -11,6 +11,8 @@ export class DefaultOmokRule extends OmokRule {
 
     private lastPlaced: Coordinate;
 
+    private remains: number;
+
     constructor(size: number = 19) {
         super();
         this.size = size;
@@ -19,6 +21,7 @@ export class DefaultOmokRule extends OmokRule {
 
     init() {
         this.stoneInfo = this.stoneInfo.map(() => 0);
+        this.remains = this.size * this.size;
     }
 
     getStoneColor(pos: Coordinate): StoneColor | null {
@@ -47,6 +50,6 @@ export class DefaultOmokRule extends OmokRule {
     }
 
     isFinished(): boolean {
-        return false;
+        return this.remains === 0;
     }
 }
