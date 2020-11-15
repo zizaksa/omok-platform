@@ -210,4 +210,11 @@ export class AppGame {
             this.players[data.color] = data.player;
         });
     }
+
+    changePlayer(color: StoneColor, playerType: 'user' | 'ai') {
+        // TODO
+        const player = playerType === 'user' ? new AppUserPlayer(this, color) : new AppAIPlayer(this, color);
+        this.event.gameEnded.emit();
+        this._event.playerChanged.emit({ color, player });
+    }
 }

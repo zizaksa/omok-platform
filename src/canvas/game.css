@@ -12,4 +12,20 @@ html, body {
     height: 100%;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+}
+
+#control {
+    display: flex;
+    margin: 0;
+    width: 1000px;
+}
+
+#control .column {
+    flex: 1;
+    text-align: center;
+}
+
+#control select {
+    width: 125px;
 }

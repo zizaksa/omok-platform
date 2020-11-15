@@ -4,7 +4,27 @@
     <link href="game.css" rel="stylesheet">
 </head>
 <body>
-    <div id="container"></div>
+    </div>
+    <div id="container">
+        <div id="control">
+            <div class="column">
+                흑돌 플레이어 선택
+                <div id="black-control">
+                    <input id="black-player-user" type="radio" name="black-player" value="user" checked><label for="black-player-user">유저</label>
+                    <input id="black-player-ai" type="radio" name="black-player" value="ai"><label for="black-player-ai">AI</label>
+                    <!--<select id="black-ai-select" name="black-ai" disabled></select>-->
+                </div>
+            </div>
+            <div class="column">
+                백돌 플레이어 선택
+                <div id="white-control">
+                    <input id="white-player-user" type="radio" name="white-player" value="user" checked><label for="white-player-user">유저</label>
+                    <input id="white-player-ai" type="radio" name="white-player" value="ai"><label for="white-player-ai">AI</label>
+                    <!--<select id="white-ai-select" name="white-ai" disabled></select>-->
+                </div>
+            </div>
+        </div> 
+    </div>
     <script src="game.bundle.js"></script>
 </body>
 </html>
