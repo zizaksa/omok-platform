@@ -1,6 +1,7 @@
 import { Application } from 'pixi.js';
 import { AppAsset } from './app-asset';
 import { AppDrawable } from './app-drawable';
+import { AppGame } from './app-game';
 
 export class AppCanvas {
     private app: Application;
@@ -8,7 +9,7 @@ export class AppCanvas {
     private displayWidth: number;
     private displayHeight: number;
 
-    constructor (private width: number, private height: number) {
+    constructor (private game: AppGame, private width: number, private height: number) {
         this.displayWidth = width;
         this.displayHeight = height;
 

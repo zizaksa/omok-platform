@@ -6,9 +6,9 @@ import { AppCanvas } from './app-canvas';
 import { AppUx } from './app-ux';
 
 export class AppGame {
-    private canvas: AppCanvas;
-    private board: AppBoard;
-    private ux: AppUx;
+    private _canvas: AppCanvas;
+    private _board: AppBoard;
+    private _ux: AppUx;
 
     private canvasWidth = 1000;
     private canvasHeight = 680;
@@ -17,12 +17,44 @@ export class AppGame {
     private uxCanvasWidth = 320;
     private uxCanvasHeight = 680;
 
-    private event: AppEventManager;
-    private server: AppServerManager;
-    private omokRule: OmokRule;
-    private gameStatus: GameStatus = GameStatus.STOPPED;
-    private turn: StoneColor;
-    private gameTokenId: number;
+    private _event: AppEventManager;
+    private _server: AppServerManager;
+    private _omokRule: OmokRule;
+    private _gameStatus: GameStatus = GameStatus.STOPPED;
+    private _turn: StoneColor;
+    private _gameTokenId: number;
+
+    get canvas() {
+        return this._canvas;
+    }
+
+    get board() {
+        return this._board;
+    }
+
+    get event() {
+        return this._event;
+    }
+
+    get server() {
+        return this._server;
+    }
+
+    get omokRule() {
+        return this._omokRule;
+    }
+
+    get gameStatus() {
+        return this._gameStatus;
+    }
+
+    get turn() {
+        return this._turn;
+    }
+
+    get gameTokenId() {
+        return this._gameTokenId;
+    }
 
     private players: {
         [key in StoneColor]?: AppPlayer
@@ -31,116 +63,111 @@ export class AppGame {
     private appInitialized: boolean = false;
 
     constructor(private container: HTMLElement, private appOptions: AppOptions = defaultAppOptions) {
-        this.server = new AppServerManager(appOptions.serverOptions.host, appOptions.serverOptions.port);
-        this.event = AppEventManager.getInstance();
+        this._server = new AppServerManager(appOptions.serverOptions.host, appOptions.serverOptions.port);
+        this._event = new AppEventManager();
     }
 
     async init() {
-        this.canvas = new AppCanvas(this.canvasWidth, this.canvasHeight);
-        await this.canvas.init();
+        this._canvas = new AppCanvas(this, this.canvasWidth, this.canvasHeight);
+        await this._canvas.init();
 
-        this.omokRule = new DefaultOmokRule();
-        this.board = new AppBoard(this.boardWidth, this.boardHeight, this.omokRule);
-        this.canvas.addDrawable(this.board);
+        this._omokRule = new DefaultOmokRule();
+        this._board = new AppBoard(this, this.boardWidth, this.boardHeight);
+        this._canvas.addDrawable(this._board);
 
-        this.ux = new AppUx(this.uxCanvasWidth, this.uxCanvasHeight);
-        this.ux.getView().x = this.boardWidth;
-        this.canvas.addDrawable(this.ux);
+        this._ux = new AppUx(this, this.uxCanvasWidth, this.uxCanvasHeight);
+        this._ux.getView().x = this.boardWidth;
+        this._canvas.addDrawable(this._ux);
 
-        this.gameTokenId = 0;
+        this._gameTokenId = 0;
         this.initEvnetListeners();
 
         this.players = {};
-        // [StoneColor.BLACK]: new AppAIPlayer(StoneColor.BLACK, this.server),
-        // [StoneColor.BLACK]: new AppUserPlayer(StoneColor.BLACK, this.board, this.server),
-        // [StoneColor.WHITE]: new AppAIPlayer(StoneColor.WHITE, this.server),
-        // [StoneColor.WHITE]: new AppUserPlayer(StoneColor.WHITE, this.board)
 
         // Server Connection
-        await this.server.connect();
+        await this._server.connect();
         console.log('Server Connected');
 
-        this.event.playerChanged.emit({
+        this._event.playerChanged.emit({
             color: StoneColor.BLACK,
-            player: new AppAIPlayer(StoneColor.BLACK, this.server)
+            player: new AppUserPlayer(this, StoneColor.BLACK)
         });
-        this.event.playerChanged.emit({
+        this._event.playerChanged.emit({
             color: StoneColor.WHITE,
-            // player: new AppUserPlayer(StoneColor.WHITE, this.server, this.board)
-            player: new AppUserPlayer(StoneColor.WHITE, this.server, this.board, this)
+            player: new AppUserPlayer(this, StoneColor.WHITE)
         });
 
         // Initialized
         this.appInitialized = true;
 
         // Add to view
-        this.container.appendChild(this.canvas.getView());
+        this.container.appendChild(this._canvas.getView());
     }
 
     async initGame() {
-        if (this.gameStatus !== GameStatus.STOPPED) {
+        if (this._gameStatus !== GameStatus.STOPPED) {
             return Promise.reject('Game is playing');
         }
 
-        this.gameStatus = GameStatus.INITIALIZING;
-        this.turn = StoneColor.BLACK;
-        this.board.clearBoard();
-        await this.server.initGame({
+        this._gameStatus = GameStatus.INITIALIZING;
+        this._turn = StoneColor.BLACK;
+        this._board.clearBoard();
+        await this._server.initGame({
             players: {
                 [StoneColor.BLACK]: this.players[StoneColor.BLACK].getName(),
                 [StoneColor.WHITE]: this.players[StoneColor.WHITE].getName()
             }
         });
-        this.gameStatus = GameStatus.INITIALIZED;
+        this._gameStatus = GameStatus.INITIALIZED;
     }
 
     async startGame() {
-        if (this.gameStatus !== GameStatus.INITIALIZED) {
+        if (this._gameStatus !== GameStatus.INITIALIZED) {
             return;
         }
 
-        this.gameStatus = GameStatus.PLAYING;
+        this._gameStatus = GameStatus.PLAYING;
         this.changeTurn(true);
-        await this.server.startGame();
-        this.gameProcess(this.gameTokenId);
+        await this._server.startGame();
+        this.gameProcess(this._gameTokenId);
     }
 
     async stopGame() {
-        if (this.gameStatus === GameStatus.STOPPED) {
+        if (this._gameStatus === GameStatus.STOPPED) {
             return Promise.resolve();
         }
 
-        this.gameStatus = GameStatus.STOPPING;
-        await this.server.stopGame();
-        this.gameTokenId++;
-        this.gameStatus = GameStatus.STOPPED;
+        this._gameStatus = GameStatus.STOPPING;
+        await this._server.stopGame();
+        this._gameTokenId++;
+        this._gameStatus = GameStatus.STOPPED;
     }
 
     async gameProcess(gameTokenId: number) {
         let pos = new Coordinate(-1, -1);
 
-        while (gameTokenId === this.gameTokenId && this.gameStatus === GameStatus.PLAYING) {
-            pos = await this.players[this.turn].getNextPlace(pos);
+        while (gameTokenId === this._gameTokenId && this._gameStatus === GameStatus.PLAYING) {
+            pos = await this.players[this._turn].getNextPlace(pos);
             await this.placeStone(pos);
         }
     }
 
     private changeTurn(init: boolean = false) {
         if (init) {
-            this.event.turnChanged.emit(StoneColor.BLACK);
+            this._event.turnChanged.emit(StoneColor.BLACK);
             return;
         }
 
-        if (this.turn == StoneColor.BLACK) {
-            this.event.turnChanged.emit(StoneColor.WHITE);
+        if (this._turn == StoneColor.BLACK) {
+            this._event.turnChanged.emit(StoneColor.WHITE);
         } else {
-            this.event.turnChanged.emit(StoneColor.BLACK);
+            this._event.turnChanged.emit(StoneColor.BLACK);
         }
     }
 
     private async placeStone(pos: Coordinate) {
         try {
-            const res = await this.server.placeStone(this.turn, pos);
+            const res = await this._server.placeStone(this._turn, pos);
             if (typeof res === 'string') {
                 if (res.indexOf('win') >= 0) {
                     console.log('winner', '');
@@ -152,13 +179,13 @@ export class AppGame {
             this.stopGame();
         }
 
-        if (this.board.placeStone(this.turn, pos)) {
+        if (this._board.placeStone(this._turn, pos)) {
             this.changeTurn();
         }
     }
 
     private initEvnetListeners() {
-        this.event.gameStarted.on(() => {
+        this._event.gameStarted.on(() => {
             Promise.resolve().then(() => {
                 return this.stopGame();
             }).then(() => {
@@ -171,15 +198,15 @@ export class AppGame {
             });
         });
 
-        this.event.gameEnded.on(() => {
+        this._event.gameEnded.on(() => {
             this.stopGame();
         });
 
-        this.event.turnChanged.on((turn: StoneColor) => {
-            this.turn = turn;
+        this._event.turnChanged.on((turn: StoneColor) => {
+            this._turn = turn;
         });
 
-        this.event.playerChanged.on((data) => {
+        this._event.playerChanged.on((data) => {
             this.players[data.color] = data.player;
         });
     }

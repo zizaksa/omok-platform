@@ -1,6 +1,6 @@
 import { Container, DisplayObject, Graphics, InteractionEvent, Sprite, Text } from 'pixi.js';
+import { AppGame } from './app-game';
 import { Coordinate, DefaultOmokRule, OmokRule, StoneColor } from '../../common';
-import { AppEventManager } from '../core';
 import { AppAsset } from './app-asset';
 import { AppDrawable, AppDrawableUtils } from './app-drawable';
 import { AppStone } from './app-stone';
@@ -23,17 +23,14 @@ export class AppBoard implements AppDrawable {
 
     private hintStoneColor: StoneColor = StoneColor.BLACK;
 
-    private event: AppEventManager;
-
     private waitingScreen: Container;
 
     constructor(
+        private game: AppGame,
         private width: number, 
         private height: number,
-        private rule: OmokRule = new DefaultOmokRule(),
         private size: number = 19
     ) {
-        this.event = AppEventManager.getInstance();
         this.gridColor = 0x000;
 
         this.placedStones = [];
@@ -69,8 +66,8 @@ export class AppBoard implements AppDrawable {
             const point = event.data.getLocalPosition(this.view);
             const gridPos = this.getGridPosition(point.x, point.y);
 
-            if (gridPos.x >= 0 && this.rule.checkValidity(this.hintStoneColor, gridPos)) {
-                this.event.gridSelected.emit(gridPos);
+            if (gridPos.x >= 0 && this.game.omokRule.checkValidity(this.hintStoneColor, gridPos)) {
+                this.game.event.gridSelected.emit(gridPos);
             }
         });
 
@@ -89,11 +86,11 @@ export class AppBoard implements AppDrawable {
         AppDrawableUtils.setCenter(waitingText, this.view);
         this.waitingScreen.addChild(waitingText);
 
-        this.event.gameStarted.on(() => {
+        this.game.event.gameStarted.on(() => {
             this.hideWaiting();
         });
 
-        this.event.gameEnded.on(() => {
+        this.game.event.gameEnded.on(() => {
             // this.showWaiting();
             this.disableInteraction();
         });
@@ -156,7 +153,7 @@ export class AppBoard implements AppDrawable {
     }
 
     clearBoard() {
-        this.rule.init();
+        this.game.omokRule.init();
         this.eraseStoneHint();
         this.placedStones.forEach(({pos, stone}) => {
             this.view.removeChild(stone.getView());
@@ -225,7 +222,7 @@ export class AppBoard implements AppDrawable {
     }
 
     hintStone(pos: Coordinate) {
-        if (this.rule.getStoneColor(pos) !== null) {
+        if (this.game.omokRule.getStoneColor(pos) !== null) {
             this.eraseStoneHint();
             return;
         }
@@ -245,8 +242,8 @@ export class AppBoard implements AppDrawable {
     placeStone(color: StoneColor, pos: Coordinate): boolean {
         const idx = pos.x + pos.y * this.size;
 
-        if (this.rule.checkValidity(color, pos)) {
-            this.rule.placeStone(color, pos);
+        if (this.game.omokRule.checkValidity(color, pos)) {
+            this.game.omokRule.placeStone(color, pos);
             const stone = this.createStone(color);
             stone.setPosition(this.getDrawPosition(pos));
             this.placedStones.push({ pos, stone });
@@ -264,7 +261,7 @@ export class AppBoard implements AppDrawable {
         }
 
         return new Promise((resolve, reject) => {
-            this.event.gridSelected.once((pos: Coordinate) => {
+            this.game.event.gridSelected.once((pos: Coordinate) => {
                 if (autoDisable) {
                     this.disableInteraction();
                 }

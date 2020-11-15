@@ -15,8 +15,7 @@ export class AppEventManager {
     readonly stonePlaced = this.createEvent<Coordinate>('STONE_PLACED');
     readonly playerChanged = this.createEvent<{ color: StoneColor, player: AppPlayer }>('PLAYER_CHANGED');
 
-    private constructor() {}
-
+    /*
     public static getInstance(): AppEventManager {
         if (!this.instance) {
             this.instance = new AppEventManager();
@@ -24,6 +23,7 @@ export class AppEventManager {
 
         return this.instance;
     }
+    */
     
     private createEvent<T=void>(eventName: string): AppEvent<T> {
         return new AppEvent(eventName, this.eventEmitter);

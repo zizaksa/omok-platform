@@ -1,22 +1,19 @@
 import { Container, DisplayObject, Graphics, Text } from 'pixi.js';
+import { AppGame } from './app-game';
 import { GameStatus, getOpponent, StoneColor } from '../../common';
-import { AppEventManager } from '../core';
 import { AppDrawable } from './app-drawable';
 import { AppPlayerInfo } from './app-player-info';
 
 export class AppUx implements AppDrawable {
     private view: Container;
-    private event: AppEventManager
-
     private playerInfo: { [key in StoneColor]: AppPlayerInfo };
-
     private gameStatus: GameStatus = GameStatus.STOPPED;
 
     constructor(
+        private game: AppGame,
         private width: number,
         private height: number
     ) {
-        this.event = AppEventManager.getInstance();
         this.view = new Container();
 
         const background = new Graphics();
@@ -35,18 +32,18 @@ export class AppUx implements AppDrawable {
 
         gameStartButton.on('click', () => {
             if (this.gameStatus === GameStatus.PLAYING) {
-                this.event.gameEnded.emit();
+                this.game.event.gameEnded.emit();
             } else {
-                this.event.gameStarted.emit();
+                this.game.event.gameStarted.emit();
             }
         });
 
-        this.event.gameStarted.on(() => {
+        this.game.event.gameStarted.on(() => {
             this.gameStatus = GameStatus.PLAYING;
             gameStartButton.text = '대국 중지';
         });
 
-        this.event.gameEnded.on(() => {
+        this.game.event.gameEnded.on(() => {
             this.gameStatus = GameStatus.STOPPED;
             gameStartButton.text = '대국 시작';
         });
@@ -66,13 +63,13 @@ export class AppUx implements AppDrawable {
             [StoneColor.WHITE]: whitePlayer
         };
 
-        this.event.turnChanged.on((turn) => {
+        this.game.event.turnChanged.on((turn) => {
             const opponent = getOpponent(turn);
             this.playerInfo[turn].active();
             this.playerInfo[opponent].inactive();
         });
 
-        this.event.playerChanged.on(({color, player}) => {
+        this.game.event.playerChanged.on(({color, player}) => {
             this.playerInfo[color].name = player.getName() === 'user' ? '플레이어': player.getName();
         });
     }

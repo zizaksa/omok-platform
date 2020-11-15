@@ -1,10 +1,8 @@
-import { Coordinate } from '../../common/coordinate';
-import { StoneColor } from '../../common/stone-color';
+import { Coordinate, StoneColor } from "../../common";
+import { AppGame } from "../ui";
 
 export abstract class AppPlayer {
-    protected color: StoneColor;
-
-    constructor(color: StoneColor) {
+    constructor(protected game: AppGame, protected color: StoneColor) {
         this.color = color;
     }
 
