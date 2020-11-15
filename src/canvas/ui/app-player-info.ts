@@ -1,5 +1,5 @@
 import { Container, DisplayObject, Graphics, Sprite, Text } from 'pixi.js';
-import { StoneColor } from '../../common/stone-color';
+import { StoneColor } from '../../common';
 import { AppAsset } from './app-asset';
 import { AppDrawable, AppDrawableUtils } from './app-drawable';
 

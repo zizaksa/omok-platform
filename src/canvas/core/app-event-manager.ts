@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
-import { Coordinate } from '../../common/coordinate';
-import { StoneColor } from '../../common/stone-color';
+import { Coordinate, StoneColor } from '../../common';
 import { AppPlayer } from '../player/app-player';
 import { AppEvent } from './app-event';
 

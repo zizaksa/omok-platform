@@ -1,17 +1,9 @@
+import { Coordinate, DefaultOmokRule, GameStatus, OmokRule, StoneColor } from '../../common';
+import { AppEventManager, AppOptions, AppServerManager, defaultAppOptions } from '../core';
+import { AppAIPlayer, AppPlayer, AppUserPlayer } from '../player';
 import { AppBoard } from './app-board';
 import { AppCanvas } from './app-canvas';
-import { Coordinate } from '../../common/coordinate';
-import { DefaultOmokRule } from '../../common/rules/default-omok-rule';
 import { AppUx } from './app-ux';
-import { AppPlayer } from '../player/app-player';
-import { AppAIPlayer } from '../player/app-ai-player';
-import { AppUserPlayer } from '../player/app-user-player';
-import { StoneColor } from '../../common/stone-color';
-import { GameStatus } from '../../common/game-status';
-import { AppEventManager } from '../core/app-event-manager';
-import { AppServerManager } from '../core/app-server-manager';
-import { AppOptions, defaultAppOptions } from '../core/app-options';
-import { OmokRule } from '../../common/rules/omok-rule';
 
 export class AppGame {
     private canvas: AppCanvas;
@@ -75,7 +67,7 @@ export class AppGame {
         this.event.playerChanged.emit({
             color: StoneColor.WHITE,
             // player: new AppUserPlayer(StoneColor.WHITE, this.server, this.board)
-            player: new AppUserPlayer(StoneColor.WHITE, this.server, this.board)
+            player: new AppUserPlayer(StoneColor.WHITE, this.server, this.board, this)
         });
 
         // Initialized

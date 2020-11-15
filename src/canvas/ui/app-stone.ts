@@ -1,6 +1,5 @@
 import { Container, DisplayObject, Sprite } from 'pixi.js';
-import { Coordinate } from '../../common/coordinate';
-import { StoneColor } from '../../common/stone-color';
+import { Coordinate, StoneColor } from '../../common';
 import { AppAsset } from './app-asset';
 import { AppDrawable } from './app-drawable';
 

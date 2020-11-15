@@ -1,8 +1,5 @@
 import * as io from 'socket.io-client';
-import { Coordinate } from '../../common/coordinate';
-import { GameConfig } from '../../common/game-config';
-import { MSG_GET_NEXT_PLACE, MSG_INIT_GAME, MSG_PLACE_STONE, MSG_START_GAME, MSG_STOP_GAME } from '../../common/messages';
-import { StoneColor } from '../../common/stone-color';
+import { Coordinate, GameConfig, MSG_GET_NEXT_PLACE, MSG_INIT_GAME, MSG_PLACE_STONE, MSG_START_GAME, MSG_STOP_GAME, StoneColor } from '../../common';
 
 export class AppServerManager {
     private socket: SocketIOClient.Socket;

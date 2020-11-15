@@ -1,13 +1,13 @@
-import { Coordinate } from '../../common/coordinate';
-import { StoneColor } from '../../common/stone-color';
-import { AppServerManager } from '../core/app-server-manager';
-import { AppBoard } from '../ui/app-board';
+import { Coordinate, StoneColor } from '../../common';
+import { AppServerManager } from '../core';
+import { AppBoard, AppGame } from '../ui';
 import { AppPlayer } from './app-player';
 
 export class AppUserPlayer extends AppPlayer {
     constructor(color: StoneColor,
                 private server: AppServerManager,
-                private board: AppBoard) {
+                private board: AppBoard,
+                private app: AppGame) {
         super(color);
     }
 

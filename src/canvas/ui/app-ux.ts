@@ -1,9 +1,6 @@
-import { EventEmitter } from 'events';
 import { Container, DisplayObject, Graphics, Text } from 'pixi.js';
-import { GameStatus } from '../../common/game-status';
-import { getOpponent, StoneColor } from '../../common/stone-color';
-import { AppEventManager } from '../core/app-event-manager';
-import { AppPlayer } from '../player/app-player';
+import { GameStatus, getOpponent, StoneColor } from '../../common';
+import { AppEventManager } from '../core';
 import { AppDrawable } from './app-drawable';
 import { AppPlayerInfo } from './app-player-info';
 
