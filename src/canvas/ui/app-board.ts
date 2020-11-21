@@ -1,6 +1,7 @@
+import { GlowFilter } from '@pixi/filter-glow';
 import { Container, DisplayObject, Graphics, InteractionEvent, Sprite, Text } from 'pixi.js';
 import { AppGame } from './app-game';
-import { Coordinate, DefaultOmokRule, OmokRule, StoneColor } from '../../common';
+import { Coordinate, StoneColor } from '../../common';
 import { AppAsset } from './app-asset';
 import { AppDrawable, AppDrawableUtils } from './app-drawable';
 import { AppStone } from './app-stone';
@@ -15,6 +16,7 @@ export class AppBoard implements AppDrawable {
 
     private view: Container;
     private hintStoneDrawables: { [key in StoneColor]: AppStone };
+    private empStone: Graphics;
 
     private placedStones: {
         pos: Coordinate,
@@ -96,6 +98,15 @@ export class AppBoard implements AppDrawable {
             this.disableInteraction();
         });
         this.showWaiting();
+
+        // 마지막 스톤 강조
+        this.empStone = new Graphics()
+            .beginFill(0xFFFFFF)
+            .drawCircle(0, 0, 15)
+            .endFill();
+        this.empStone.filters = [
+            new GlowFilter({ distance: 25, outerStrength: 3, color: 0xFFFFFF })
+        ];
     }
 
     drawBoard() {
@@ -159,6 +170,7 @@ export class AppBoard implements AppDrawable {
         this.placedStones.forEach(({pos, stone}) => {
             this.view.removeChild(stone.getView());
         });
+        this.view.removeChild(this.empStone);
         this.placedStones = [];
     }
 
@@ -248,6 +260,11 @@ export class AppBoard implements AppDrawable {
             const stone = this.createStone(color);
             stone.setPosition(this.getDrawPosition(pos));
             this.placedStones.push({ pos, stone });
+
+            this.empStone.x = this.getDrawPosition(pos).x;
+            this.empStone.y = this.getDrawPosition(pos).y;
+            
+            this.view.addChild(this.empStone);
             this.view.addChild(stone.getView());
 
             return true;
