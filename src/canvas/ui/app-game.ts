@@ -170,17 +170,19 @@ export class AppGame {
             const res = await this._server.placeStone(this._turn, pos);
             if (typeof res === 'string') {
                 if (res.indexOf('win') >= 0) {
-                    console.log('winner', '');
-                    this.stopGame();
+                    console.log('winner', res.split(' ')[1]);
+                    this.event.gameEnded.emit();
                 }
             }
         } catch(e) {
             console.log(e);
-            this.stopGame();
+            this.event.gameEnded.emit();
         }
 
         if (this._board.placeStone(this._turn, pos)) {
-            this.changeTurn();
+            if (!this.omokRule.isFinished()) {
+                this.changeTurn();
+            }
         }
     }
 
