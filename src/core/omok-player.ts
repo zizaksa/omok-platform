@@ -3,6 +3,7 @@ import { StoneColor } from '../common/stone-color';
 import { AIRunner } from './ai/ai-runner';
 import * as path from 'path';
 import * as fs from 'fs';
+import { APP_CONFIG } from '../config';
 
 export abstract class OmokPlayer {
     init() {}
@@ -17,18 +18,17 @@ export class OmokUserPlayer extends OmokPlayer {
 
 export class OmokAIPlayer extends OmokPlayer {
     private color: StoneColor;
-    private readonly AI_DIR = path.join('.', 'ai');
     private aiPath: string;
     private runner: AIRunner;
 
     constructor(private name: string) {
         super();
 
-        if (fs.existsSync(path.join(this.AI_DIR, name))) {
-            this.aiPath = path.join(this.AI_DIR, name);
+        if (fs.existsSync(path.join(APP_CONFIG.AI_DIRPATH, name))) {
+            this.aiPath = path.join(APP_CONFIG.AI_DIRPATH, name);
             this.runner = new AIRunner(this.aiPath);
-        } else if (fs.existsSync(path.join(this.AI_DIR, `${name}.exe`))) {
-            this.aiPath = path.join(this.AI_DIR, `${name}.exe`);
+        } else if (fs.existsSync(path.join(APP_CONFIG.AI_DIRPATH, `${name}.exe`))) {
+            this.aiPath = path.join(APP_CONFIG.AI_DIRPATH, `${name}.exe`);
             this.runner = new AIRunner(this.aiPath);
         } else {
             throw new Error('AI is not exist');

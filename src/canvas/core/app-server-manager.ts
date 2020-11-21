@@ -1,5 +1,5 @@
 import * as io from 'socket.io-client';
-import { Coordinate, GameConfig, MSG_GET_NEXT_PLACE, MSG_INIT_GAME, MSG_PLACE_STONE, MSG_START_GAME, MSG_STOP_GAME, StoneColor } from '../../common';
+import { Coordinate, GameConfig, MSG_GET_AI_LIST, MSG_GET_NEXT_PLACE, MSG_INIT_GAME, MSG_PLACE_STONE, MSG_START_GAME, MSG_STOP_GAME, StoneColor } from '../../common';
 
 export class AppServerManager {
     private socket: SocketIOClient.Socket;
@@ -35,6 +35,10 @@ export class AppServerManager {
 
     stopGame(): Promise<string> {
         return this.sendAndWaitResponse(MSG_STOP_GAME);
+    }
+
+    getAIList(): Promise<string[]> {
+        return this.sendAndWaitResponse(MSG_GET_AI_LIST);
     }
 
     sendAndWaitResponse(msgName: string, data?: any): Promise<any> {

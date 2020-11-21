@@ -3,9 +3,7 @@ import { AppGame } from './app-game';
 import { GameStatus, getOpponent, StoneColor } from '../../common';
 import { AppDrawable, AppDrawableUtils } from './app-drawable';
 import { AppPlayerInfo } from './app-player-info';
-import { UITextButton } from './component/ui-text-button';
-import { UIList } from './component/ui-list';
-import { UIPopup } from './component/ui-popup';
+import { UIButton, UIList, UISettingPopup } from './component';
 
 export class AppUx implements AppDrawable {
     private view: Container;
@@ -16,7 +14,7 @@ export class AppUx implements AppDrawable {
     private playerInfo: { [key in StoneColor]: AppPlayerInfo };
     private gameStatus: GameStatus = GameStatus.STOPPED;
 
-    private settingPopup: UIPopup;
+    private settingPopup: UISettingPopup;
 
     constructor(
         private game: AppGame
@@ -80,10 +78,13 @@ export class AppUx implements AppDrawable {
 
     private drawButton() {
         const list = new UIList();
-        const gameStartButton = new UITextButton('대국시작');
+        const gameStartButton = new UIButton('대국 시작', 120, 60);
 
         gameStartButton
-            .setColor(0x000)
+            .setTextStyle({
+                color: 0x000,
+                fontFamily: 'Kostar'
+            })
             .on('click', () => {
                 if (this.gameStatus === GameStatus.PLAYING) {
                     this.game.event.gameEnded.emit();
@@ -104,14 +105,13 @@ export class AppUx implements AppDrawable {
 
         list.addDrawable(gameStartButton);
 
-        const settingButton = new UITextButton('설정')
-            .setColor(0x000)
+        const settingButton = new UIButton('설정', 120, 60)
+            .setTextStyle({
+                color: 0x000,
+                fontFamily: 'Kostar'
+            })
             .on('click', () => {
-                if (this.view.getChildByName('SettingPopup')) {
-                    this.view.removeChild(this.settingPopup.getView());
-                } else {
-                    this.view.addChild(this.settingPopup.getView());
-                }
+                this.openSettingPopup();
             });
 
         list.addDrawable(settingButton);
@@ -122,10 +122,26 @@ export class AppUx implements AppDrawable {
     }
 
     private createPopup() {
-        this.settingPopup = new UIPopup(this.game);
+        this.settingPopup = new UISettingPopup(this.game);
         const v = this.settingPopup.getView();
         v.name = 'SettingPopup';
         v.x = -this.view.x + 40;
         v.y = 40;
+
+        this.settingPopup.onClose = () => {
+            this.closeSettingPopup();
+        };
+        
+        this.settingPopup.onSave = () => {
+            this.closeSettingPopup();
+        };
+    }
+
+    private openSettingPopup() {
+        this.view.addChild(this.settingPopup.getView());
+    }
+
+    private closeSettingPopup() {
+        this.view.removeChild(this.settingPopup.getView());
     }
 }

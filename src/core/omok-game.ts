@@ -1,12 +1,16 @@
 import * as io from 'socket.io';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Coordinate } from '../common/coordinate';
 import { DEFAULT_GAME_CONFIG, GameConfig } from '../common/game-config';
 import { GameStatus } from '../common/game-status';
-import { MSG_GET_NEXT_PLACE, MSG_INIT_GAME, MSG_PLACE_STONE, MSG_START_GAME, MSG_STOP_GAME } from '../common/messages';
+import { MSG_GET_AI_LIST, MSG_GET_NEXT_PLACE, MSG_INIT_GAME, MSG_PLACE_STONE, MSG_START_GAME, MSG_STOP_GAME } from '../common/messages';
 import { DefaultOmokRule } from '../common/rules/default-omok-rule';
 import { OmokRule } from '../common/rules/omok-rule';
 import { getOpponent, StoneColor } from '../common/stone-color';
 import { OmokAIPlayer, OmokPlayer, OmokUserPlayer } from './omok-player';
+import { APP_CONFIG } from '../config';
+import { pathToFileURL } from 'url';
 
 export class OmokGame {
     private players: { [key in StoneColor]?: OmokPlayer } = {};
@@ -111,6 +115,30 @@ export class OmokGame {
             player.getNextPlace(pos).then((nextPos) => {
                 this.socket.emit(MSG_GET_NEXT_PLACE, nextPos);
             });
+        });
+
+        this.socket.on(MSG_GET_AI_LIST, () => {
+            const list = fs.readdirSync(APP_CONFIG.AI_DIRPATH).filter(file => {
+                // check if is executable
+                if (process.platform === "win32") {
+                    if (path.extname(file) === '.exe') {
+                        return true;
+                    }
+                }
+
+                try {
+                    // Check if linux has execution rights
+                    fs.accessSync(file, fs.constants.X_OK);
+                    return true;
+                } catch(ex) {
+                }
+
+                return false;
+            }).map(ai => {
+                return path.parse(ai).name;
+            });
+
+            this.socket.emit(MSG_GET_AI_LIST, list);
         });
     }
 

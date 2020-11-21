@@ -211,9 +211,15 @@ export class AppGame {
         });
     }
 
-    changePlayer(color: StoneColor, playerType: 'user' | 'ai') {
+    changePlayer(color: StoneColor, playerName: string) {
         // TODO
-        const player = playerType === 'user' ? new AppUserPlayer(this, color) : new AppAIPlayer(this, color);
+        let player: AppPlayer;
+
+        if (playerName === 'user') {
+            player = new AppUserPlayer(this, color);
+        } else {
+            player = new AppAIPlayer(this, color).select(playerName);
+        }
         this.event.gameEnded.emit();
         this._event.playerChanged.emit({ color, player });
     }
