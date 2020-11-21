@@ -1,3 +1,27 @@
+@font-face {
+    font-family: 'Kostar';
+    src: url('assets/fonts/Kostar.eot');
+    src: url('assets/fonts/Kostar.eot?#iefix') format('embedded-opentype'),
+        url('assets/fonts/Kostar.woff2') format('woff2'),
+        url('assets/fonts/Kostar.woff') format('woff'),
+        url('assets/fonts/Kostar.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kostar';
+    src: url('assets/fonts/KostarB.eot');
+    src: url('assets/fonts/KostarB.eot?#iefix') format('embedded-opentype'),
+        url('assets/fonts/KostarB.woff2') format('woff2'),
+        url('assets/fonts/KostarB.woff') format('woff'),
+        url('assets/fonts/KostarB.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
 html, body {
     margin: 0;
     width: 100%;

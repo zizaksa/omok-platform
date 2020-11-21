@@ -81,6 +81,7 @@ export class AppBoard implements AppDrawable {
         const waitingText = new Text('대국이 준비중입니다.', {
             fill: 0xFFFFFF,
             fontSize: 24,
+            fontFamily: 'Kostar',
             fontStyle: 'bold'
         });
         AppDrawableUtils.setCenter(waitingText, this.view);

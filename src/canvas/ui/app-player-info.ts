@@ -29,7 +29,7 @@ export class AppPlayerInfo implements AppDrawable {
         const borderSize = 3;
         this.view = new Container();
         this.bg = new Graphics();
-        this.bg.beginFill(0x000);
+        this.bg.beginFill(0x424242);
         this.bg.drawRect(0, 0, this.width, this.height);
         this.bg.endFill();
 
@@ -38,17 +38,18 @@ export class AppPlayerInfo implements AppDrawable {
         const stone = new Sprite(AppAsset.get(color == StoneColor.BLACK ? AppAsset.IMG_BLACK_STONE : AppAsset.IMG_WHITE_STONE).texture);
         stone.width = 50;
         stone.height = 50;
-        stone.x = this.width - stone.width - 10;
+        stone.x = 20;
         AppDrawableUtils.setVerticalCenter(stone, this.view);
         this.view.addChild(stone);
 
         this._name = '플레이어를 선택해주세요';
         this.nameText = new Text(this._name, {
-            fontSize: 13,
+            fontSize: 15,
+            fontFamily: 'Kostar',
             fill: 0xFFFFFF
         });
-        this.nameText.anchor.x = 1;
-        this.nameText.x = stone.x - 10;
+        this.nameText.anchor.x = 0;
+        this.nameText.x = stone.x + stone.width + 15;
         AppDrawableUtils.setVerticalCenter(this.nameText, this.view);
         this.view.addChild(this.nameText);
     }

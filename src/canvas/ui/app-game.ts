@@ -10,12 +10,13 @@ export class AppGame {
     private _board: AppBoard;
     private _ux: AppUx;
 
-    private canvasWidth = 1000;
-    private canvasHeight = 680;
-    private boardWidth = 680;
-    private boardHeight = 680;
-    private uxCanvasWidth = 320;
-    private uxCanvasHeight = 680;
+    public readonly canvasWidth = 1000;
+    public readonly canvasHeight = 680;
+    public readonly boardWidth = 680;
+    public readonly boardHeight = 680;
+    public readonly uxCanvasWidth = 320;
+    public readonly uxCanvasHeight = 680;
+    public readonly popupMargin = 40;
 
     private _event: AppEventManager;
     private _server: AppServerManager;
@@ -75,8 +76,7 @@ export class AppGame {
         this._board = new AppBoard(this, this.boardWidth, this.boardHeight);
         this._canvas.addDrawable(this._board);
 
-        this._ux = new AppUx(this, this.uxCanvasWidth, this.uxCanvasHeight);
-        this._ux.getView().x = this.boardWidth;
+        this._ux = new AppUx(this);
         this._canvas.addDrawable(this._ux);
 
         this._gameTokenId = 0;

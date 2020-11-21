@@ -1,4 +1,5 @@
 import { Loader } from 'pixi.js';
+import * as WebFont from 'webfontloader';
 
 export class AppAsset {
     private static instance: AppAsset;
@@ -16,7 +17,9 @@ export class AppAsset {
         this.assets = {
             IMG_BOARD: 'assets/board_texture.jpg',
             IMG_BLACK_STONE: 'assets/stone_black.png',
-            IMG_WHITE_STONE: 'assets/stone_white.png'
+            IMG_WHITE_STONE: 'assets/stone_white.png',
+            FONT_KOSTAR: 'assets/fonts/Kostar.woff2',
+            FONT_KOSTARB: 'assets/fonts/KostarB.woff2'
         };
 
         for (const resId in this.assets) {
@@ -44,6 +47,17 @@ export class AppAsset {
         return new Promise((resolve, reject) => {
             this.loader.load(() => {
                 resolve();
+            });
+        }).then(() => {
+            return new Promise((resolve, reject) => {
+                WebFont.load({
+                    custom: {
+                        families: ['Kostar']
+                    },
+                    active: () => {
+                        setTimeout(() => resolve(), 0);
+                    }
+                });
             });
         });
     }
