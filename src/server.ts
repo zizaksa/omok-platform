@@ -40,7 +40,9 @@ export class OmokServer {
 
 if (require.main == module) {
     const server = new OmokServer(APP_CONFIG.SERVER_PORT);
-    server.run();
+    server.run().then(() => {
+		console.log('Server Running!')
+	});
 
     /*
     const rl = readline.createInterface({

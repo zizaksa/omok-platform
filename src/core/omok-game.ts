@@ -128,7 +128,8 @@ export class OmokGame {
 
                 try {
                     // Check if linux has execution rights
-                    fs.accessSync(file, fs.constants.X_OK);
+					const f = path.join(APP_CONFIG.AI_DIRPATH, file);
+                    fs.accessSync(f, fs.constants.X_OK);
                     return true;
                 } catch(ex) {
                 }

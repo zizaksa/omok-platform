@@ -10,7 +10,11 @@ export class AppServerManager {
 
     connect(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.socket = io.connect(`http://${this.host}:${this.port}`);
+			if (this.port === 80) {
+            	this.socket = io.connect(`${this.host}`);
+			} else {
+            	this.socket = io.connect(`${this.host}:${this.port}`);
+			}
             this.socket.once('connect', () => {
                 resolve();
             });

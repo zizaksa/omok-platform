@@ -9,7 +9,7 @@
     "build": "npm run build:server && npm run build:client",
     "start": "npm run build && set DEBUG=* && ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch:client": "webpack-dev-server --port 8080",
+    "watch:client": "webpack-dev-server --host 0.0.0.0 --port 8080",
     "watch:server": "nodemon --exec ts-node src/server.ts",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts"

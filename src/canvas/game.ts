@@ -2,7 +2,12 @@ import { StoneColor } from '../common';
 import { AppGame } from './ui/app-game';
 
 const container = document.getElementById('container');
-const game = new AppGame(container);
+const game = new AppGame(container, {
+	serverOptions: {
+		host: '<Put your host>',
+		port: '<Put your port>'
+	}
+});
 
 game.init().then(() => {
     console.log('Game initialized'); 
